@@ -10,6 +10,8 @@ import Profile from './pages/Profile';
 import ArtistProfile from './pages/ArtistProfile';
 import Settings from './pages/Settings';
 import { useAuth } from './context/AuthContext';
+import TermsPrivacy from './pages/TermsPrivacy';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Auth utilities
 import { initializeDefaultUsers } from './utils/auth'; // Uncommented this!
@@ -59,6 +61,10 @@ function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/artist/:id" element={<ArtistProfile />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/terms" element={<TermsPrivacy />} />
+      <Route path="/privacy" element={<TermsPrivacy />} />
+      <Route path="/artist-terms" element={<TermsPrivacy />} />
 
       {/* Root Route - Redirect based on Authentication State */}
       <Route
@@ -73,7 +79,7 @@ function App() {
       />
 
       {/* Catch-all Route */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
     </Routes>
   );
 }

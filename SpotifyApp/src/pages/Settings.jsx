@@ -1,3 +1,5 @@
+// src/pages/Settings.jsx
+
 import { useState } from 'react';
 import Sidebar from '../components/home/Sidebar';
 import ChangePassword from '../components/settings/ChangePassword';

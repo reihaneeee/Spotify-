@@ -82,6 +82,62 @@
   color: #fff;
 }
 
+/* استایل‌های اختصاصی برای نمایه هنرمند درون پروفایل شخصی */
+
+.verified-badge-inline {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 12px;
+  color: #1db954;
+}
+
+.verified-badge-inline svg {
+  width: 32px;
+  height: 32px;
+}
+
+.profile-joined {
+  color: #b3b3b3;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-bio {
+  color: #b3b3b3;
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 12px 0 0;
+}
+
+.profile-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.portfolio-link {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.portfolio-link:hover {
+  background: #1db954;
+  color: #000;
+  transform: scale(1.05);
+}
+
 .btn-edit-profile {
   margin-top: 12px;
   align-self: flex-start;

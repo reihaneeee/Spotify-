@@ -1,3 +1,5 @@
+// src/utils/validation.js
+
 /**
  * Validate email format
  * Trims spaces and checks a standard email pattern.

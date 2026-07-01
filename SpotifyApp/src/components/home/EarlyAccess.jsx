@@ -1,3 +1,5 @@
+// src/components/home/EarlyAccess.jsx
+
 import MediaCard from './MediaCard';
 
 /**

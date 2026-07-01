@@ -1,3 +1,5 @@
+// src/components/home/Showcase.jsx
+
 import MediaCard from './MediaCard';
 
 /**

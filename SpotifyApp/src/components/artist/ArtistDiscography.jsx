@@ -1,3 +1,5 @@
+// src/components/artist/ArtistDiscography.jsx
+
 // import React from 'react';
 import MediaCard from '../home/MediaCard';
 

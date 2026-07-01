@@ -1,4 +1,5 @@
 // src/components/home/Header.jsx
+
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -39,7 +40,7 @@ export default function Header() {
         <Link to="/profile" className="user-info">
           <div className="user-avatar">
             {user.profileImage ? (
-              <img src={user.profileImage} alt={displayName} />
+              <img src={user.avatar} alt={displayName} />
             ) : (
               initials
             )}

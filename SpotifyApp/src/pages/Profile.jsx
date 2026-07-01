@@ -1,3 +1,5 @@
+// src/pages/Profile.jsx
+
 import { useState } from 'react';
 import Sidebar from '../components/home/Sidebar';
 import ProfileHeader from '../components/profile/ProfileHeader';

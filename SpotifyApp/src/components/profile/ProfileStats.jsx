@@ -1,3 +1,5 @@
+// src/components/profile/ProfileStats.jsx
+
 // import React from 'react';
 
 const BASIC_DAILY_LIMIT = 60;

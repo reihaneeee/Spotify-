@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Home, ListMusic, Disc3, Headphones, User, Settings, ChevronLeft, ChevronRight, ShieldCheck } from 'lucide-react'; // ایمپورت آیکون‌های وکتور
+import { useAuth } from '../../context/AuthContext';
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const { user } = useAuth(); // برای بررسی دسترسی ادمین
 
   return (
     <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -12,7 +15,7 @@ export default function Sidebar() {
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
-        {collapsed ? '→' : '←'}
+        {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
       </button>
 
       <nav className="sidebar-nav">
@@ -20,7 +23,7 @@ export default function Sidebar() {
           to="/home" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
-          <span className="icon">🏠</span>
+          <Home className="icon" size={24} />
           <span>Home</span>
         </NavLink>
         
@@ -28,7 +31,7 @@ export default function Sidebar() {
           to="/playlists" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
-          <span className="icon">🎵</span>
+          <ListMusic className="icon" size={24} />
           <span>Playlists</span>
         </NavLink>
         
@@ -36,7 +39,7 @@ export default function Sidebar() {
           to="/albums" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
-          <span className="icon">💿</span>
+          <Disc3 className="icon" size={24} />
           <span>Albums</span>
         </NavLink>
         
@@ -44,7 +47,7 @@ export default function Sidebar() {
           to="/singles" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
-          <span className="icon">🎧</span>
+          <Headphones className="icon" size={24} />
           <span>Singles</span>
         </NavLink>
         
@@ -52,7 +55,7 @@ export default function Sidebar() {
           to="/profile" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
-          <span className="icon">👤</span>
+          <User className="icon" size={24} />
           <span>Profile</span>
         </NavLink>
         
@@ -60,9 +63,21 @@ export default function Sidebar() {
           to="/settings" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
-          <span className="icon">⚙️</span>
+          <Settings className="icon" size={24} />
           <span>Settings</span>
         </NavLink>
+
+        {/* لینک پنل ادمین که فقط برای ادمین نشان داده می‌شود */}
+        {user && user.userType === 'admin' && (
+          <NavLink 
+            to="/admin" 
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            style={{ marginTop: 'auto', color: '#1db954' }}
+          >
+            <ShieldCheck className="icon" size={24} color="currentColor" />
+            <span>Admin Panel</span>
+          </NavLink>
+        )}
       </nav>
     </div>
   );

@@ -53,9 +53,9 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
-  /*background-color: #121212; */
+  min-height: 100vh; /* تغییر به min-height */
+  background-color: #121212; /* فعال کردن رنگ تیره پس‌زمینه */
+  color: var(--text-h);
 }
 
 #root {
@@ -63,6 +63,8 @@ html, body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
+  display: flex; /* برای پر کردن کل ارتفاع */
+  flex-direction: column;
 }
 
 h1, h2 {

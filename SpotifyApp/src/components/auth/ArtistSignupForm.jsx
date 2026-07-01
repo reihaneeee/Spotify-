@@ -1,7 +1,10 @@
+// src/components/auth/ArtistSignupForm.jsx
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerArtist } from '../../utils/auth';
 import { validateEmail, validatePassword } from '../../utils/validation';
+import { Eye, EyeOff } from 'lucide-react';
 
 /**
  * ArtistSignupForm Component
@@ -255,7 +258,7 @@ const ArtistSignupForm = () => {
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             tabIndex="-1"
           >
-            {showPassword ? '🙈' : '👁️'}
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
         {errors.password && <span className="error-text">{errors.password}</span>}

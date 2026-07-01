@@ -1,6 +1,9 @@
+// src/components/settings/ChangePassword.jsx
+
 import { useState } from 'react';
 import { validatePassword } from '../../utils/validation';
 import { useAuth } from '../../context/AuthContext';
+import { apiChangePassword } from '../../utils/auth';
 
 export default function ChangePassword() {
   const { user, updateUser } = useAuth(); // Get user and updateUser from context
@@ -45,6 +48,12 @@ export default function ChangePassword() {
       return;
     }
 
+    const result = apiChangePassword(user.username, form.currentPassword, form.newPassword);
+
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
     updateUser({ password: form.newPassword });
     setSuccess('Password changed successfully.');
     setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });

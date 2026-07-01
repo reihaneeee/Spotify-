@@ -1,3 +1,5 @@
+// src/components/home/MediaCard.jsx
+
 import { formatPlays } from '../../utils/mockData';
 import { Link } from 'react-router-dom';
 

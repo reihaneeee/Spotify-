@@ -1,3 +1,5 @@
+// src/components/settings/PaymentHistory.jsx
+
 import { useState } from 'react';
 
 // داده‌های فیک برای تاریخچه پرداخت

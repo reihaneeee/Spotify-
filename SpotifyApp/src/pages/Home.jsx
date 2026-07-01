@@ -1,3 +1,5 @@
+// src/pages/Home.jsx
+
 import { useState } from 'react';
 import Sidebar from '../components/home/Sidebar';
 import Header from '../components/home/Header';

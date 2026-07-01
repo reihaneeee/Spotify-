@@ -1,9 +1,11 @@
 // src/components/auth/SignupForm.jsx
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../../utils/auth';
 import { validateEmail, validatePassword, validateAge } from '../../utils/validation';
 import { useAuth } from '../../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 /**
  * SignupForm Component - for regular users (listeners)
@@ -196,7 +198,7 @@ const SignupForm = () => {
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             tabIndex="-1"
           >
-            {showPassword ? '🙈' : '👁️'}
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
         {errors.password && <span className="error-text">{errors.password}</span>}
@@ -225,7 +227,7 @@ const SignupForm = () => {
             aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             tabIndex="-1"
           >
-            {showConfirmPassword ? '🙈' : '👁️'}
+            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
         {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}

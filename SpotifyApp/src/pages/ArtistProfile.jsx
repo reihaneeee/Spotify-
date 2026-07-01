@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/home/Sidebar';
 import ArtistHeader from '../components/artist/ArtistHeader';
@@ -11,25 +11,32 @@ import '../styles/artist.css';
 export default function ArtistProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const user = useMemo(() => getCurrentUser(), []);
   
+  // گرفتن اطلاعات کاربر لاگین شده
+  const user = useMemo(() => getCurrentUser(), []);
 
-  // محاسبه artist از id بدون useEffect
+  // ۱. محاسبه اطلاعات هنرمند بدون تغییر مسیر (فقط منطق دیتا)
   const artist = useMemo(() => {
-    const artistData = getArtistById(id);
-    if (!artistData) {
+    return getArtistById(id);
+  }, [id]);
+
+  // ۲. مدیریت هدایت به صفحه اصلی در صورت پیدا نشدن هنرمند (باید در useEffect باشد)
+  useEffect(() => {
+    if (!artist) {
       navigate('/home');
-      return null;
     }
-    return artistData;
-  }, [id, navigate]);
+  }, [artist, navigate]);
 
-  // following state رو با lazy initializer بده
-  const [following, setFollowing] = useState(() => {
-    if (!user || !artist) return false;
-    return isFollowing(user.username, artist.id);
-  });
+  // ۳. مدیریت وضعیت Follow به صورت کاملاً داینامیک
+  const [following, setFollowing] = useState(false);
+  
+  useEffect(() => {
+    if (user && artist) {
+      setFollowing(isFollowing(user.username, artist.id));
+    }
+  }, [id, user, artist]);
 
+  // تا زمانی که دیتا لود نشده یا در حال ریدایرکت هستیم، چیزی رندر نکن تا ارور ندهد
   if (!artist) return null;
 
   const handleFollowToggle = () => {
@@ -50,7 +57,7 @@ export default function ArtistProfile() {
   const isGold = user?.subscription === 'gold';
 
   return (
-    <div className="app-layout">
+    <div className="home-layout">
       <Sidebar />
       <main className="artist-page">
         <ArtistHeader

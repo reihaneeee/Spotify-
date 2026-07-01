@@ -1,3 +1,5 @@
+// src/utils/mockData.js
+
 /**
  * Mock Data Initializer
  * Seeds localStorage with sample playlists, albums, and songs
@@ -74,7 +76,7 @@ export const initMockData = () => {
       name: 'Luna Ray',
       bio: 'Singer-songwriter crafting indie folk stories with raw emotion.',
       avatar: 'https://i.pravatar.cc/200?img=44',
-      verified: false,
+      verified: true,
       listeners: 320000,
       streams: 8500000,
       albums: ['album-3'],
@@ -133,7 +135,6 @@ export function followArtist(username, artistId) {
 
   localStorage.setItem('users', JSON.stringify(users));
 
-  // به‌روزرسانی currentUser
   const current = JSON.parse(localStorage.getItem('currentUser') || 'null');
   if (current && current.username === username) {
     current.following = users[idx].following;

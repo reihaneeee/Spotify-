@@ -1,3 +1,5 @@
+// src/components/settings/ManageSubscription.jsx
+
 import { useState } from 'react';
 
 const PLANS = [

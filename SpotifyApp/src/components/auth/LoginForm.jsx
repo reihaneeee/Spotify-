@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { validateEmail } from '../../utils/validation';
+import { Eye, EyeOff } from 'lucide-react';
 
 /**
  * LoginForm Component
@@ -76,29 +77,21 @@ const LoginForm = () => {
           localStorage.setItem('rememberMe', 'true');
         }
 
-        navigate('/home');
-
-        // For phase2-or other tasks in phase 1 
-        // because currently we dont have admin and support pages
-        // Redirect based on user type
-        /*if (result.user.userType === 'admin') {
-          navigate('/admin/dashboard');
-        } else if (result.user.userType === 'support') {
-          navigate('/support/dashboard');
+        if (result.user.userType === 'admin') {
+          navigate('/admin');
         } else {
           navigate('/home');
-        }*/
+        }
+
       } else {
         setErrors({ general: result.message });
       }
-      } catch {
+    } catch {
       setErrors({ general: 'An error occurred. Please try again.' });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-        
-      
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="auth-form">
@@ -148,7 +141,7 @@ const LoginForm = () => {
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             tabIndex="-1"
           >
-            {showPassword ? '🙈' : '👁️'}
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
         {errors.password && <span className="error-text">{errors.password}</span>}

@@ -1,4 +1,5 @@
 // src/components/profile/EditProfileModal.jsx
+
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 

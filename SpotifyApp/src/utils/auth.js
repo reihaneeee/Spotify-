@@ -21,16 +21,19 @@ export const initializeDefaultUsers = () => {
         createdAt: new Date().toISOString()
       },
       {
-        id: '2',
+        id: 'artist-1',
         email: 'artist@test.com',
         password: 'Test123!',
-        artistName: 'Test Artist',
+        artistName: 'Nova Waves',
         userType: 'artist',
         username: 'artist_1',
         isVerified: true,
+        status: 'approved',
+        portfolioLinks: ['https://soundcloud.com/novawaves', 'https://www.instagram.com/novawaves'],
         bio: 'A passionate musician',
         profileImage: null,
         followers: 1250,
+        following: 12,
         totalStreams: 45000,
         createdAt: new Date().toISOString()
       },
@@ -65,6 +68,9 @@ export const loginUser = async (email, password) => {
     const safeUser = { ...user };
     delete safeUser.password;
     
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('currentUser', JSON.stringify(safeUser));
+
     return {
       success: true,
       token,
@@ -118,6 +124,25 @@ export const registerUser = async (userData) => {
   };
 };
 
+export const apiChangePassword = (username, currentPassword, newPassword) => {
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const idx = users.findIndex((u) => u.username === username);
+  
+  if (idx === -1) return { success: false, message: 'User not found.' };
+  if (users[idx].password !== currentPassword) return { success: false, message: 'Current password is incorrect.' };
+
+  users[idx].password = newPassword;
+  localStorage.setItem('users', JSON.stringify(users));
+  return { success: true };
+};
+
+export const apiDeleteAccount = (username) => {
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const filtered = users.filter((u) => u.username !== username);
+  localStorage.setItem('users', JSON.stringify(filtered));
+  return { success: true };
+};
+
 export const registerArtist = async (artistData) => {
   await new Promise(resolve => setTimeout(resolve, 1000));
   initializeDefaultUsers();
@@ -159,7 +184,7 @@ export const registerArtist = async (artistData) => {
 
 export const logoutUser = () => {
   localStorage.removeItem('authToken');
-  localStorage.removeItem('userData');
+  localStorage.removeItem('currentUser');
 };
 
 export const isAuthenticated = () => {
@@ -185,8 +210,8 @@ export function updateCurrentUser(updates) {
   const updated = { ...current, ...updates };
 
   //localStorage.setItem('currentUser', JSON.stringify(updated));
-  localStorage.setItem('userData', JSON.stringify(updated));
-
+  localStorage.setItem('currentUser', JSON.stringify(updated));
+  
   const users = JSON.parse(localStorage.getItem('users') || '[]');
   const idx = users.findIndex((u) => u.username === updated.username);
   if (idx !== -1) {

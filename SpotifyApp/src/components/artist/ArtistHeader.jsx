@@ -1,3 +1,5 @@
+// src/components/artist/ArtistHeader.jsx
+
 //import React from 'react';
 
 const DEFAULT_AVATAR =

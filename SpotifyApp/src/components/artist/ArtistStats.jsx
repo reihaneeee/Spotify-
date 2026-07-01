@@ -1,3 +1,5 @@
+// src/components/artist/ArtistStats.jsx
+
 //import React from 'react';
 
 export default function ArtistStats({ artist }) {
