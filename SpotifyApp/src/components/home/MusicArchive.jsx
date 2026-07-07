@@ -12,7 +12,10 @@ export default function MusicArchive() {
   const [sortBy, setSortBy] = useState('plays');
   const [playlists, setPlaylists] = useState([]);
   const [activeMenuSongId, setActiveMenuSongId] = useState(null);
+  
+  // استیت‌های جدید مدیریت انیمیشن دوطرفه (سبز برای اد / قرمز برای حذف)
   const [animatingCardId, setAnimatingCardId] = useState(null);
+  const [animationType, setAnimationType] = useState('add'); // 'add' or 'remove'
 
   const allSongs = getSongs();
   const allAlbums = getAlbums();
@@ -48,25 +51,36 @@ export default function MusicArchive() {
     return a.title.localeCompare(b.title);
   });
 
-  const addTrackToPlaylist = (playlistId, item) => {
+  // 🔴 تابع هوشمند دوطرفه: مدیریت خودکار افزودن یا حذف اثر از پلی‌لیست
+  const toggleTrackInPlaylist = (playlistId, item, isAlreadyAdded) => {
     const allPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
     
     const updated = allPlaylists.map(p => {
       if (p.id === playlistId) {
         const currentSongs = p.songs || [];
-        if (currentSongs.some(s => s.id === item.id)) return p;
-        return { ...p, songs: [...currentSongs, { ...item, itemType: item.itemType }] };
+        
+        if (isAlreadyAdded) {
+          // سناریو حذف: اثر از پلی‌لیست فیلتر و حذف می‌شود
+          return { ...p, songs: currentSongs.filter(s => s.id !== item.id) };
+        } else {
+          // سناریو افزودن: اثر به پلی‌لیست الحاق می‌شود
+          return { ...p, songs: [...currentSongs, { ...item, itemType: item.itemType }] };
+        }
       }
       return p;
     });
     
     localStorage.setItem('playlists', JSON.stringify(updated));
     setActiveMenuSongId(null);
+    setPlaylists(updated); // به‌روزرسانی زنده وضعیت منو
     
+    // 🟢 راه‌اندازی جلوه انیمیشنی متناسب با اکشن کاربر
+    setAnimationType(isAlreadyAdded ? 'remove' : 'add');
     setAnimatingCardId(item.id);
+    
     setTimeout(() => {
       setAnimatingCardId(null);
-    }, 1000);
+    }, 800);
   };
 
   return (
@@ -98,6 +112,9 @@ export default function MusicArchive() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
         {filteredItems.map(item => {
           const isAnimating = animatingCardId === item.id;
+          // تعیین رنگ انیمیشن بر اساس نوع اکشن (افزودن: سبز / حذف: قرمز)
+          const targetBgColor = animationType === 'add' ? '#144c27' : '#5c1515';
+          const targetBorderColor = animationType === 'add' ? '#1db954' : '#e91429';
           
           return (
             <div 
@@ -106,9 +123,9 @@ export default function MusicArchive() {
                 padding: '15px', 
                 borderRadius: '8px', 
                 position: 'relative',
-                backgroundColor: isAnimating ? '#144c27' : '#181818', 
-                border: isAnimating ? '1px solid #1db954' : '1px solid transparent',
-                transition: 'background-color 0.4s ease, border 0.4s ease'
+                backgroundColor: isAnimating ? targetBgColor : '#181818', 
+                border: isAnimating ? `1px solid ${targetBorderColor}` : '1px solid transparent',
+                transition: 'background-color 0.2s ease, border 0.2s ease'
               }}
             >
               <img src={item.cover} alt="" style={{ width: '100%', borderRadius: '4px', marginBottom: '10px' }} />
@@ -133,20 +150,32 @@ export default function MusicArchive() {
                 )}
               </div>
 
+              {/* منوی هوشمند پاپ‌آپ دوطرفه */}
               {activeMenuSongId === item.id && (
-                <div style={{ position: 'absolute', bottom: '50px', right: '10px', backgroundColor: '#282828', border: '1px solid #444', borderRadius: '4px', zIndex: 10, width: '160px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-                  <div style={{ padding: '6px', fontSize: '11px', color: '#888', borderBottom: '1px solid #444', textAlign: 'right' }}>افزودن به پلی‌لیست:</div>
-                  {playlists.map(p => (
-                    <div 
-                      key={p.id} 
-                      onClick={() => addTrackToPlaylist(p.id, item)} 
-                      style={{ padding: '8px 10px', cursor: 'pointer', fontSize: '13px', textAlign: 'right', color: '#fff', transition: 'background 0.2s' }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#383838'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                    >
-                      {p.title}
-                    </div>
-                  ))}
+                <div style={{ position: 'absolute', bottom: '50px', right: '10px', backgroundColor: '#282828', border: '1px solid #444', borderRadius: '4px', zIndex: 10, width: '170px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                  <div style={{ padding: '6px', fontSize: '11px', color: '#888', borderBottom: '1px solid #444', textAlign: 'right' }}>مدیریت در پلی‌لیست‌ها:</div>
+                  {playlists.map(p => {
+                    // 🔴 بررسی اینکه آیا این آهنگ/آلبوم در حال حاضر در این پلی‌لیست هست یا خیر
+                    const isAdded = (p.songs || []).some(s => s.id === item.id);
+                    
+                    return (
+                      <div 
+                        key={p.id} 
+                        onClick={() => toggleTrackInPlaylist(p.id, item, isAdded)} 
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', cursor: 'pointer', fontSize: '13px', textAlign: 'right', color: '#fff', transition: 'background 0.2s' }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#383838'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+                        {/* 🔴 رندر داینامیک علامت مثبت سبز یا منفی قرمز متناسب با وجود اثر */}
+                        {isAdded ? (
+                          <span style={{ color: '#e91429', fontWeight: 'bold', fontSize: '14px' }} title="حذف از لیست">➖</span>
+                        ) : (
+                          <span style={{ color: '#1db954', fontWeight: 'bold', fontSize: '14px' }} title="افزودن به لیست">➕</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
