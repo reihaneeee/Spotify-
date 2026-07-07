@@ -1,0 +1,204 @@
+.supportPage {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #fff;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.backBtn:hover {
+  color: #fff;
+}
+
+.newTicket {
+  background: #1e1e1e;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.newTicket h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.newTicket input,
+.newTicket textarea {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.newTicket input:focus,
+.newTicket textarea:focus {
+  outline: none;
+  border-color: #1db954;
+}
+
+.submitBtn {
+  background: #1db954;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 500px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submitBtn:hover {
+  background: #1ed760;
+}
+
+.myTickets h3 {
+  margin-bottom: 1rem;
+}
+
+.ticketList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ticketCard {
+  background: #1e1e1e;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.ticketCard:hover {
+  border-color: #1db954;
+}
+
+.ticketHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticketSubject {
+  font-weight: 600;
+  color: #fff;
+}
+
+.statusBadge {
+  padding: 0.2rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.statusBadge.open {
+  background: #f59e0b;
+  color: #000;
+}
+.statusBadge.replied {
+  background: #3b82f6;
+  color: #fff;
+}
+.statusBadge.closed {
+  background: #6b7280;
+  color: #fff;
+}
+
+.ticketFooter {
+  display: flex;
+  justify-content: space-between;
+  color: #b3b3b3;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* Detail view */
+.ticketDetail {
+  background: #1e1e1e;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.ticketDetail h3 {
+  margin-top: 0;
+}
+
+.ticketMeta {
+  display: flex;
+  gap: 1.5rem;
+  color: #b3b3b3;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 1.5rem;
+}
+
+.chatBox {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.5rem;
+}
+
+.message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.message strong {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.userMsg {
+  background: #2a2a2a;
+  align-self: flex-start;
+  border: 1px solid #3a3a3a;
+}
+
+.supportMsg {
+  background: #1db954;
+  align-self: flex-end;
+  color: #000;
+}
+
+.msgTime {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-left: 0.5rem;
+}
+
+.emptyMessage {
+  color: #b3b3b3;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.supportPage {
+  flex: 1; /* 👈 اضافه شد تا کل فضای خالی رو پر کنه */
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  color: #fff;
+  overflow-y: auto;
+}

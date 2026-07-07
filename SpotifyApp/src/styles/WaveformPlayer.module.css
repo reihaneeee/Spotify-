@@ -1,0 +1,116 @@
+/* src/pages/ArtistDashboard/WaveformPlayer.module.css */
+
+.waveformContainer {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: var(--bg-card, #181818);
+  border: 1px solid var(--border-color, #2a2a2a);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+
+.playBtn {
+  background: var(--primary-accent, #1db954);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s;
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
+}
+
+.playBtn:hover {
+  background: #1ed760;
+  transform: scale(1.05);
+}
+
+.playBtn:active {
+  transform: scale(0.95);
+}
+
+.waveMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+   max-width: 400px;
+}
+
+.waveBarsArea {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 50px;
+  cursor: pointer;
+  position: relative;
+  touch-action: none; 
+}
+
+.waveBar {
+  flex: 1;
+  min-width: 2px;
+  max-width: 4px;
+  border-radius: 2px;
+  transition: background-color 0.1s ease;
+}
+
+
+.barPlayed {
+  background-color: var(--primary-accent, #1db954);
+}
+
+.barHover {
+  background-color: rgba(29, 185, 84, 0.5); 
+}
+
+.barUnplayed {
+  background-color: #4a4a4a;
+}
+
+.timeInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-secondary, #b3b3b3);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.trackName {
+  color: var(--text-primary, #ffffff);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+  text-align: center;
+}
+
+
+@media (max-width: 480px) {
+  .waveformContainer {
+    flex-direction: column;
+    padding: 1.25rem 1rem;
+    gap: 1rem;
+  }
+  
+  .playBtn {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .waveMain {
+    width: 100%;
+  }
+  
+  .trackName {
+    max-width: 50%;
+  }
+}

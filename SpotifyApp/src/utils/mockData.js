@@ -172,3 +172,24 @@ export const formatPlays = (plays) => {
   if (plays >= 1000) return `${(plays / 1000).toFixed(1)}K`;
   return plays.toString();
 };
+
+export const getPublishedWorks = () => {
+  const stored = localStorage.getItem('artist_works');
+  if (!stored) return [];
+  
+  try {
+    const allWorks = JSON.parse(stored);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0); // نادیده گرفتن ساعت برای مقایسه دقیق تاریخ
+    
+    // فیلتر کردن کارهایی که تاریخ انتشارشان رسیده یا گذشته است
+    return allWorks.filter(work => {
+      if (!work.releaseDate) return true; // اگر تاریخی نداشت، منتشر شده فرض می‌شود
+      const releaseDate = new Date(work.releaseDate);
+      releaseDate.setHours(0, 0, 0, 0);
+      return releaseDate <= now;
+    });
+  } catch {
+    return [];
+  }
+};

@@ -1,3 +1,4 @@
+// src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -9,8 +10,8 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import ArtistProfile from './pages/ArtistProfile';
 import Settings from './pages/Settings';
-import { useAuth } from './context/AuthContext';
 import TermsPrivacy from './pages/TermsPrivacy';
+<<<<<<< HEAD
 import AdminDashboard from './pages/AdminDashboard';
 import Playlists from './pages/Playlists';
 
@@ -24,16 +25,25 @@ import { initializeDefaultUsers } from './utils/auth';
 
 function App() {
   const { user, loading } = useAuth(); // Access user from Context
+=======
+import ArtistDashboard from './pages/ArtistDashboard/ArtistDashboard';
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
+import SupportPage from './pages/Support/SupportPage';
 
-  // Apply language settings globally to the HTML tag
+// Context & Utils
+import { useAuth } from './context/AuthContext';
+import { DataProvider } from './context/DataContext'; // 👈 ایمپورت جدید
+import { initializeDefaultUsers } from './utils/auth'; 
+import './styles/globals.css';
+
+function App() {
+  const { user, loading} = useAuth(); 
+>>>>>>> origin/phase1_part_10_and_11
+
   useEffect(() => {
-    // Read language setting from localStorage
     const settings = JSON.parse(localStorage.getItem('spotifySettings') || '{}');
     const lang = settings.language || 'en';
-
-    // Apply to HTML tag for CSS and translation tools
     document.documentElement.lang = lang;
-    // Set RTL direction if language is Persian
     document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
 
     // فایل src/App.jsx - داخل useEffect
@@ -71,27 +81,27 @@ function App() {
 
   }, [user]);
 
-  // Initialize default users for testing (only runs once on mount)
   useEffect(() => {
     initializeDefaultUsers();
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#121212', color: '#fff' }}>
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#121212', color: '#fff' }}>Loading...</div>;
   
   return (
+<<<<<<< HEAD
     <PlaybackProvider> {/* حل مشکل: پرووایدر را اینجا می‌گذاریم تا پلیر زیرمجموعه آن شود */}
       <Routes>
         {/* Public Routes (Auth) */}
+=======
+    // 👈 اضافه شدن DataProvider
+    <DataProvider>
+      <Routes>
+>>>>>>> origin/phase1_part_10_and_11
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
+<<<<<<< HEAD
         {/* Note for Phase 2: Currently public for UI demonstration */}
         <Route path="/home" element={<Home />} />
         <Route path="/playlists" element={<Playlists />} />
@@ -121,6 +131,22 @@ function App() {
       {/* پلیر ثابت سراسری در پایین تمام صفحات */}
       <MusicPlayerFixed currentUser={user} />
     </PlaybackProvider>
+=======
+        <Route path="/home" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/artist/:id" element={<ArtistProfile />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/terms" element={<TermsPrivacy />} />
+        <Route path="/privacy" element={<TermsPrivacy />} />
+        <Route path="/artist-terms" element={<TermsPrivacy />} />
+        <Route path="/artist-dashboard" element={<ArtistDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/support" element={<SupportPage />} />
+        
+        <Route path="/" element={user ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
+      </Routes>
+    </DataProvider>
+>>>>>>> origin/phase1_part_10_and_11
   );
 }
 

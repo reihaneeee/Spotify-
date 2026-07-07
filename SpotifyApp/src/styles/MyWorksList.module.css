@@ -1,0 +1,389 @@
+/* src/pages/ArtistDashboard/MyWorksList.module.css */
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ===== Search & Sort Controls ===== */
+.controlsBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchInput {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 0.25rem 0;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--text-secondary);
+}
+
+.sortWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-card);
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.sortBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  transition: all var(--transition-speed);
+}
+
+.sortBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.activeSort {
+  color: var(--primary-accent);
+  background: rgba(29, 185, 84, 0.15);
+}
+
+/* ===== Grid & Cards ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-speed), border-color 0.2s;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: #4a4a4a;
+}
+
+.coverWrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.coverImage, .defaultCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardContent {
+  padding: 1rem;
+  flex-grow: 1;
+}
+
+.title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta, .audioMeta {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.audioMeta span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  border-top: 1px solid var(--border-color);
+}
+
+.actions button {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: background var(--transition-speed);
+}
+
+.editBtn {
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+}
+
+.editBtn:hover {
+  background: var(--bg-hover);
+}
+
+.deleteBtn {
+  color: var(--danger-color);
+}
+
+.deleteBtn:hover {
+  background: rgba(226, 33, 52, 0.1);
+}
+
+/* ===== Detail View (صفحه تکی آهنگ) ===== */
+.detailView {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: color var(--transition-speed);
+}
+
+.backBtn:hover {
+  color: var(--text-primary);
+}
+
+.detailCard {
+  display: flex;
+  gap: 2rem;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.detailCoverWrapper {
+  width: 300px;
+  max-width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-hover);
+}
+
+.detailCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detailInfo {
+  flex: 1;
+  min-width: 250px;
+}
+
+.detailInfo h2 {
+  color: var(--text-primary);
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.detailMeta {
+  color: var(--text-secondary);
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.noAudio {
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+.detailSection {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.detailSection p {
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.lyricsText {
+  color: var(--text-secondary);
+  font-family: inherit;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg-dark);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.detailStats {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.detailStats span {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 500px;
+  border: 1px solid var(--border-color);
+}
+
+/* ===== Empty States ===== */
+.emptyState {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px dashed var(--border-color);
+}
+
+.emptyIcon {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.uploadBtn {
+  background: var(--primary-accent);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 500px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.uploadBtn:hover {
+  background: #1ed760;
+  transform: translateY(-2px);
+}
+
+.emptyStateSmall {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem 0;
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 768px) {
+  .controlsBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .searchWrapper {
+    max-width: 100%;
+  }
+  .sortWrapper {
+    justify-content: center;
+  }
+  .detailCard {
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+  }
+  .detailCoverWrapper {
+    width: 100%;
+    max-width: 300px;
+  }
+  .detailInfo {
+    width: 100%;
+  }
+  .detailInfo h2 {
+    text-align: center;
+  }
+  .detailMeta {
+    text-align: center;
+  }
+  .detailStats {
+    justify-content: center;
+  }
+}
