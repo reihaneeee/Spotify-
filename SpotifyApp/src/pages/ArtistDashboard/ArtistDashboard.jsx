@@ -91,6 +91,7 @@ const ArtistDashboard = () => {
               works={myWorks} 
               onDelete={deleteWork} 
               onEdit={handleEdit} 
+              onNavigateToUpload={() => setActiveTab('upload')} /* 👈 این خط اضافه شود */
             />
           )}
         </section>

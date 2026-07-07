@@ -32,7 +32,9 @@ export const DataProvider = ({ children }) => {
   }, [financials]);
 
   const addUser = (user) => setUsers(prev => [...prev, { ...user, id: Date.now() }]);
-  const updateUser = (id, updates) => setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updates } : u));
+  const updateUser = (id, updates) => setUsers(prev => prev.map(u => 
+    (u.id === id || u.username === id) ? { ...u, ...updates } : u
+  ));
   const getUserByEmail = (email) => users.find(u => u.email === email);
   
   const addTicket = (ticket) => setTickets(prev => [...prev, { ...ticket, id: Date.now(), messages: ticket.messages || [], status: 'open' }]);
@@ -44,12 +46,31 @@ export const DataProvider = ({ children }) => {
     ));
   };
   const getTicketsForUser = (userId) => tickets.filter(t => t.userId === userId);
+  const addUserReplyToTicket = (ticketId, reply) => {
+    setTickets(prev => prev.map(t => 
+      t.id === ticketId 
+        ? { 
+            ...t, 
+            messages: [...t.messages, { sender: 'user', text: reply, timestamp: new Date().toISOString() }], 
+            status: 'open' // وضعیت دوباره open میشه تا ادمین متوجه پیام جدید بشه
+          }
+        : t
+    ));
+  };
+
+  // تابع بستن تیکت توسط کاربر
+  const closeTicket = (ticketId) => {
+    setTickets(prev => prev.map(t => 
+      t.id === ticketId ? { ...t, status: 'closed' } : t
+    ));
+  };
 
   return (
     <DataContext.Provider value={{
       users, tickets, financials,
       addUser, updateUser, getUserByEmail,
       addTicket, addReplyToTicket, getTicketsForUser, setFinancials,
+      addUserReplyToTicket, closeTicket
     }}>
       {children}
     </DataContext.Provider>

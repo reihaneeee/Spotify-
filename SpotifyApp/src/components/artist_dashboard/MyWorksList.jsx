@@ -5,7 +5,7 @@ import { EmptyMusicIcon, EditIcon, DeleteIcon, SearchIcon, SortIcon, ArrowUpIcon
 import WaveformPlayer from './WaveformPlayer';
 import DefaultCover from './DefaultCover';
 
-const MyWorksList = ({ works, onDelete, onEdit }) => {
+const MyWorksList = ({ works, onDelete, onEdit, onNavigateToUpload }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('title');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -36,7 +36,12 @@ const MyWorksList = ({ works, onDelete, onEdit }) => {
         <EmptyMusicIcon size={64} className={styles.emptyIcon} />
         <h3>No works published yet</h3>
         <p>Publish your first work!</p>
-        <button className={styles.uploadBtn} onClick={() => window.dispatchEvent(new CustomEvent('switchTab', { detail: 'upload' }))}>Upload New Work</button>
+        <button 
+          className={styles.uploadBtn}
+          onClick={onNavigateToUpload} /* 👈 اینجا تغییر کرد */
+        >
+          Upload New Work
+        </button>
       </div>
     );
   }

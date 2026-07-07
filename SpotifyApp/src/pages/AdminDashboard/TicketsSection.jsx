@@ -1,68 +1,95 @@
 // src/pages/AdminDashboard/TicketsSection.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './AdminDashboard.module.css';
-import { CloseIcon } from '../../components/icons';
 
 const TicketsSection = ({ tickets, onReply }) => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [replyText, setReplyText] = useState('');
 
+  useEffect(() => {
+    if (selectedTicket) {
+      const freshTicket = tickets.find(t => t.id === selectedTicket.id);
+      if (freshTicket) {
+        setSelectedTicket(freshTicket);
+      }
+    }
+  }, [tickets]);
   const handleReply = () => {
     if (replyText.trim()) {
       onReply(selectedTicket.id, replyText);
       setReplyText('');
+      
     }
   };
 
   if (selectedTicket) {
     return (
-      <div className={styles.ticketDetail}>
-        <button 
-          className={styles.backBtn} 
-          onClick={() => setSelectedTicket(null)}
-        >
+      <div className={styles.ticketDetail} style={{ background: '#1e1e1e', padding: '1.5rem', borderRadius: '8px' }}>
+        <button className={styles.backBtn} onClick={() => setSelectedTicket(null)}>
           ← Back to tickets
         </button>
         
-        <div className={styles.ticketHeader}>
-          <h3>{selectedTicket.subject}</h3>
-          <span className={`${styles.ticketStatus} ${styles[selectedTicket.status]}`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ margin: 0 }}>{selectedTicket.subject}</h3>
+          <span className={`${styles.statusBadge} ${styles[selectedTicket.status]}`}>
             {selectedTicket.status}
           </span>
         </div>
         
-        <div className={styles.ticketMeta}>
+        <div style={{ display: 'flex', gap: '1.5rem', color: '#b3b3b3', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
           <span>User: {selectedTicket.userName}</span>
           <span>Date: {new Date(selectedTicket.createdAt).toLocaleString()}</span>
         </div>
 
-        <div className={styles.chatBox}>
+        {/* 👇 استایل چت‌باکس دقیقاً مشابه SupportPage.jsx */}
+        <div className={styles.chatBox} style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingRight: '0.5rem' }}>
           {selectedTicket.messages && selectedTicket.messages.map((msg, idx) => (
             <div 
               key={idx} 
-              className={`${styles.message} ${msg.sender === 'user' ? styles.userMsg : styles.supportMsg}`}
+              className={styles.message}
+              style={{
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                maxWidth: '80%',
+                alignSelf: msg.sender === 'user' ? 'flex-start' : 'flex-end',
+                background: msg.sender === 'user' ? '#2a2a2a' : '#1db954',
+                color: msg.sender === 'user' ? '#fff' : '#000',
+                border: msg.sender === 'user' ? '1px solid #3a3a3a' : 'none'
+              }}
             >
-              <strong>{msg.sender === 'user' ? 'User' : 'Support'}:</strong>
+              <strong style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem' }}>
+                {msg.sender === 'user' ? 'User' : 'You (Support)'}:
+              </strong>
               {msg.text}
-              <span className={styles.msgTime}>{new Date(msg.timestamp).toLocaleTimeString()}</span>
+              <span style={{ fontSize: '0.7rem', opacity: 0.7, marginLeft: '0.5rem' }}>
+                {new Date(msg.timestamp).toLocaleTimeString()}
+              </span>
             </div>
           ))}
         </div>
 
-        <div className={styles.replyBox}>
-          <textarea
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-            placeholder="Type your reply..."
-            rows="3"
-          />
-          <button onClick={handleReply} className={styles.replyBtn}>
-            Send Reply
-          </button>
-        </div>
+        {selectedTicket.status !== 'closed' ? (
+          <div className={styles.replyBox} style={{ marginTop: '1.5rem' }}>
+            <textarea
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder="Type your reply to user..."
+              rows="3"
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', background: '#2a2a2a', border: '1px solid #3a3a3a', color: '#fff' }}
+            />
+            <button onClick={handleReply} className={styles.replyBtn} style={{ marginTop: '0.5rem' }}>
+              Send Reply
+            </button>
+          </div>
+        ) : (
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#2a2a2a', textAlign: 'center', borderRadius: '4px', color: '#b3b3b3' }}>
+             This ticket has been closed by the user.
+          </div>
+        )}
       </div>
     );
   }
+
 
   return (
     <div>

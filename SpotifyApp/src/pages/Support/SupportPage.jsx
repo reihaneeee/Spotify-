@@ -1,5 +1,5 @@
 // src/pages/Support/SupportPage.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import Sidebar from '../../components/home/Sidebar';
@@ -8,7 +8,7 @@ import { BackIcon } from '../../components/icons';
 
 const SupportPage = () => {
   const { user } = useAuth();
-  const { tickets, addTicket, getTicketsForUser, addUserReplyToTicket } = useData();
+  const { tickets, addTicket, getTicketsForUser, addUserReplyToTicket, closeTicket } = useData();
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -36,15 +36,26 @@ const SupportPage = () => {
     alert('Ticket sent!');
   };
 
+  useEffect(() => {
+    if (selectedTicket) {
+      const freshTicket = tickets.find(t => t.id === selectedTicket.id);
+      if (freshTicket) {
+        setSelectedTicket(freshTicket);
+      }
+    }
+  }, [tickets]);
   const handleUserReply = () => {
     if (!replyText.trim()) return;
     addUserReplyToTicket(selectedTicket.id, replyText);
     setReplyText('');
-    // به‌روزرسانی تیکت انتخاب شده
-    const updated = tickets.find(t => t.id === selectedTicket.id);
-    if (updated) setSelectedTicket(updated);
+    
   };
-
+  const handleCloseTicket = () => {
+    if(window.confirm('Are you sure you want to close this ticket?')) {
+        closeTicket(selectedTicket.id);
+        setSelectedTicket({...selectedTicket, status: 'closed'});
+    }
+  };
   return (
     <div className="home-layout">
       <Sidebar />
@@ -55,7 +66,17 @@ const SupportPage = () => {
               <BackIcon size={20} /> Back to tickets
             </button>
             <div className={styles.ticketDetail}>
-              <h3>{selectedTicket.subject}</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>{selectedTicket.subject}</h3>
+                {selectedTicket.status !== 'closed' && (
+                  <button 
+                    onClick={handleCloseTicket} 
+                    style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}
+                  >
+                    Close Ticket
+                  </button>
+                )}
+              </div>
               <div className={styles.ticketMeta}>
                 <span>Status: {selectedTicket.status}</span>
                 <span>Created: {new Date(selectedTicket.createdAt).toLocaleString()}</span>
@@ -74,17 +95,24 @@ const SupportPage = () => {
               </div>
 
               {/* 👇 فرم پاسخ برای کاربر */}
-              <div className={styles.replyBox}>
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Type your reply..."
-                  rows="3"
-                />
-                <button onClick={handleUserReply} className={styles.replyBtn}>
-                  Send Reply
-                </button>
-              </div>
+              {selectedTicket.status !== 'closed' ? (
+                <div className={styles.replyBox} style={{ marginTop: '1rem' }}>
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Type your reply..."
+                    rows="3"
+                    style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', background: '#2a2a2a', color: '#fff', border: '1px solid #333' }}
+                  />
+                  <button onClick={handleUserReply} className={styles.submitBtn} style={{ marginTop: '0.5rem' }}>
+                    Send Reply
+                  </button>
+                </div>
+              ) : (
+                <div style={{ marginTop: '1rem', padding: '1rem', background: '#2a2a2a', textAlign: 'center', borderRadius: '4px', color: '#b3b3b3' }}>
+                  This ticket is closed. You cannot reply to a closed ticket.
+                </div>
+              )}
             </div>
           </div>
         ) : (

@@ -11,7 +11,7 @@ export default function Sidebar() {
   // چک کردن ایمن نقش کاربر (پشتیبانی از هر دو کلید role و userType)
   const isArtist = user?.role === 'artist' || user?.userType === 'artist';
   const isAdminOrSupport = user?.role === 'admin' || user?.userType === 'admin' || user?.role === 'support' || user?.userType === 'support';
-
+  const isApprovedArtist = isArtist && user?.status === 'approved';
   return (
     <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <button 
@@ -62,7 +62,7 @@ export default function Sidebar() {
         </NavLink>
 
         {/* داشبورد اختصاصی هنرمند */}
-        {isArtist && (
+        {isApprovedArtist && (
           <NavLink 
             to="/artist-dashboard" 
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}

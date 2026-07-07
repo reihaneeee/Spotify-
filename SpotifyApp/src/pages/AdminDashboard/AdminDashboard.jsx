@@ -28,14 +28,36 @@ const AdminDashboard = () => {
 
   // تایید هنرمند در دیتابیس واقعی
   const approveArtist = (id) => {
-    updateUser(id, { status: 'approved' });
-    alert(`Artist approved successfully! They can now login.`);
+    const artist = users.find(u => u.id === id || u.username === id);
+    // 👇 ساخت نوتیفیکیشن برای هنرمند
+    const newNotification = {
+      id: Date.now(),
+      message: 'You are approved successfully and you can access dashboard now!',
+      read: false
+    };
+    
+    updateUser(id, { 
+      status: 'approved',
+      notifications: [...(artist?.notifications || []), newNotification]
+    });
+    alert(`Artist approved successfully!`);
   };
 
-  // رد هنرمند در دیتابیس واقعی
   const rejectArtist = (id, reason) => {
-    updateUser(id, { status: 'rejected', rejectReason: reason });
-    alert(`Artist rejected. Reason: ${reason}`);
+    const artist = users.find(u => u.id === id || u.username === id);
+    // 👇 ساخت نوتیفیکیشن رد درخواست برای هنرمند
+    const newNotification = {
+      id: Date.now(),
+      message: `Unfortunatelly you have are rejected because ${reason}`,
+      read: false
+    };
+
+    updateUser(id, { 
+      status: 'rejected', 
+      rejectReason: reason,
+      notifications: [...(artist?.notifications || []), newNotification]
+    });
+    alert(`Artist rejected.`);
   };
 
   const markFinancialAsPaid = (artistId) => {
