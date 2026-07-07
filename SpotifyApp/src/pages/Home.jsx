@@ -1,6 +1,7 @@
 // src/pages/Home.jsx
 
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom'; // 🔴 اضافه شد برای تشخیص روت فعال
 import Sidebar from '../components/home/Sidebar';
 import Header from '../components/home/Header';
 import Showcase from '../components/home/Showcase';
@@ -15,31 +16,26 @@ import {
 } from '../utils/mockData';
 import '../styles/home.css';
 
-/**
- * Home Page
- * Personalized landing page with showcase rows, early access,
- * a sidebar and a header. Content adapts to the user's role/subscription.
- */
+// وارد کردن کامپوننت‌های جدید فاز اول
+import NotificationsPanel from '../components/home/NotificationsPanel';
+import PlaylistManager from '../components/home/PlaylistManager';
+import MusicArchive from '../components/home/MusicArchive';
+
 function Home() {
+  initMockData();
+  const location = useLocation(); // 🔴 خواندن آدرس فعلی مرورگر
 
-    initMockData();
+  const [user] = useState(() => getCurrentUser());
+  const [songs] = useState(() => getSongs());
+  const [albums] = useState(() => getAlbums());
+  const [playlists] = useState(() => getPlaylists());
+  const [earlyAccess] = useState(() => getEarlyAccess());
 
-    const [user] = useState(() => getCurrentUser());
-    const [songs] = useState(() => getSongs());
-    const [albums] = useState(() => getAlbums());
-    const [playlists] = useState(() => getPlaylists());
-    const [earlyAccess] = useState(() => getEarlyAccess());
-
-  // Latest playlists/albums: sorted by date (newest first)
   const latestPlaylists = [...playlists].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
   const latestAlbums = [...albums].sort((a, b) => b.year - a.year);
-
-  // Most played songs: sorted by play count
   const topSongs = [...songs].sort((a, b) => b.plays - a.plays);
-
-  // Gold subscription check
   const isGold = user?.subscription === 'gold';
 
   return (
@@ -50,25 +46,33 @@ function Home() {
         <Header user={user} />
 
         <div className="home-content">
-          <Showcase
-            title="Latest Playlists"
-            items={latestPlaylists}
-            type="playlist"
-          />
+          {/* 🔴 شرط هوشمند رندر محتوا بر اساس روت فعال سایدبار */}
+          
+          {location.pathname === '/playlists' && (
+            /* بخش ۷: فقط مدیریت لیست‌های پخش در روت اصلی پلی‌لیست */
+            <PlaylistManager currentUser={user} />
+          )}
 
-          <Showcase
-            title="Latest Albums"
-            items={latestAlbums}
-            type="album"
-          />
+          {location.pathname === '/singles' && (
+            /* بخش ۸: نمایش آرشیو قطعات هنگام کلیک روی تک‌آهنگ‌ها */
+            <MusicArchive />
+          )}
 
-          <Showcase
-            title="Most Played Songs"
-            items={topSongs}
-            type="song"
-          />
+          {location.pathname === '/albums' && (
+            /* بخش ۸: نمایش آرشیو قطعات هنگام کلیک روی آلبوم‌ها */
+            <MusicArchive />
+          )}
 
-          <EarlyAccess items={earlyAccess} isGold={isGold} />
+          {(location.pathname === '/home' || location.pathname === '/') && (
+            /* صفحه اصلی پیش‌فرض: نمایش اعلانات + ویترین موسیقی‌ها */
+            <>
+              <NotificationsPanel currentUser={user} />
+              <Showcase title="Latest Playlists" items={latestPlaylists} type="playlist" />
+              <Showcase title="Latest Albums" items={latestAlbums} type="album" />
+              <Showcase title="Most Played Songs" items={topSongs} type="song" />
+              <EarlyAccess items={earlyAccess} isGold={isGold} />
+            </>
+          )}
         </div>
       </main>
     </div>

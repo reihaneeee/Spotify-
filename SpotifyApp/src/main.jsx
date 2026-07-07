@@ -5,6 +5,10 @@ import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx'; // Import
 import './styles/auth.css';
 
+// add
+import { PlaybackProvider } from './context/PlaybackContext.jsx'
+import './index.css'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>

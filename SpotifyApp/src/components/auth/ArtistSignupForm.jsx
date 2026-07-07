@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { registerArtist } from '../../utils/auth';
 import { validateEmail, validatePassword } from '../../utils/validation';
 import { Eye, EyeOff } from 'lucide-react';
+import { triggerArtistSignupNotification } from '../../utils/notificationEngine';
 
 /**
  * ArtistSignupForm Component
@@ -152,9 +153,11 @@ const ArtistSignupForm = () => {
         bio: formData.bio,
         portfolioLinks: formData.portfolioLinks.filter(link => link.trim() !== '')
       });
-
+      console.log("yyy")
       if (result.success) {
+        console.log("xxxx")
         setSubmitSuccess(true);
+        triggerArtistSignupNotification(formData.email, formData.artistName);
         // Artists need approval, don't auto-login
       } else {
         setErrors({ general: result.message });

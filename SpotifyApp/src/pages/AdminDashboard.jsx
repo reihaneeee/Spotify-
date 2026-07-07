@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/home/Sidebar';
 import { Check, X, Users } from 'lucide-react';
+import NotificationsPanel from '../components/home/NotificationsPanel';
+import { getCurrentUser } from '../utils/auth'; // یا هر متدی که کاربر فعلی (ادمین) را می‌گیرد
+
+import { triggerArtistStatusNotification } from '../utils/notificationEngine'; // اسم جدید و درست
 
 export default function AdminDashboard() {
   const [pendingArtists, setPendingArtists] = useState([]);
@@ -14,7 +18,14 @@ export default function AdminDashboard() {
 
   const handleAction = (username, action) => {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
-    
+
+    let rejectionReason = "";
+    if (action === 'reject') {
+      rejectionReason = prompt("لطفاً علت رد درخواست احراز هویت این هنرمند را وارد کنید:") || "";
+    }
+
+    const targetArtist = users.find(u => u.username === username);
+
     const updatedUsers = users.map(u => {
       if (u.username === username) {
         return { 
@@ -27,6 +38,11 @@ export default function AdminDashboard() {
     });
 
     localStorage.setItem('users', JSON.stringify(updatedUsers));
+    
+    if (targetArtist && targetArtist.email) {
+      const isAccepted = action === 'approve';
+      triggerArtistStatusNotification(targetArtist.email, isAccepted, rejectionReason);
+    }
 
     setPendingArtists(pendingArtists.filter(u => u.username !== username));
   };
