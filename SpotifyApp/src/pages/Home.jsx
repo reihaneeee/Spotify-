@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom'; 
 import { useAuth } from '../context/AuthContext'; 
+import { usePlayback } from '../context/PlaybackContext';
 import Sidebar from '../components/home/Sidebar';
 import Header from '../components/home/Header';
 import Showcase from '../components/home/Showcase';
