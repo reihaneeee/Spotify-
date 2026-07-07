@@ -42,10 +42,10 @@ function Home() {
     <div className="home-layout">
       <Sidebar user={user} />
 
-      <main className="home-main">
+      <main className="home-main" style={{ paddingBottom: '120px' }}>
         <Header user={user} />
 
-        <div className="home-content">
+        <div className="home-content" style={{ padding: '0 24px' }}>
           {/* 🔴 شرط هوشمند رندر محتوا بر اساس روت فعال سایدبار */}
           
           {location.pathname === '/playlists' && (

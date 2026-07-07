@@ -16,7 +16,7 @@ export default function Playlists() {
       {/* سایدبار سمت راست */}
       <Sidebar user={user} />
 
-      <main className="home-main">
+      <main className="home-main" style={{ paddingBottom: '120px' }}>
         {/* هدر بالایی */}
         <Header user={user} />
 
