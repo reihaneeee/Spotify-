@@ -1,3 +1,4 @@
+// src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -9,78 +10,55 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import ArtistProfile from './pages/ArtistProfile';
 import Settings from './pages/Settings';
-import { useAuth } from './context/AuthContext';
 import TermsPrivacy from './pages/TermsPrivacy';
-import AdminDashboard from './pages/AdminDashboard';
+import ArtistDashboard from './pages/ArtistDashboard/ArtistDashboard';
+import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
+import SupportPage from './pages/Support/SupportPage';
 
-// Auth utilities
-import { initializeDefaultUsers } from './utils/auth'; // Uncommented this!
+// Context & Utils
+import { useAuth } from './context/AuthContext';
+import { DataProvider } from './context/DataContext'; // 👈 ایمپورت جدید
+import { initializeDefaultUsers } from './utils/auth'; 
+import './styles/globals.css';
 
 function App() {
-  const { user, loading} = useAuth(); // Access user from Context
+  const { user, loading} = useAuth(); 
 
-  // Apply language settings globally to the HTML tag
   useEffect(() => {
-    // Read language setting from localStorage
     const settings = JSON.parse(localStorage.getItem('spotifySettings') || '{}');
     const lang = settings.language || 'en';
-
-    // Apply to HTML tag for CSS and translation tools
     document.documentElement.lang = lang;
-    // Set RTL direction if language is Persian
     document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
   }, [user]);
 
-  // Initialize default users for testing (only runs once on mount)
   useEffect(() => {
     initializeDefaultUsers();
   }, []);
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#121212', color: '#fff' }}>
-        Loading...
-      </div>
-    );
-  }
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#121212', color: '#fff' }}>Loading...</div>;
   
   return (
-    <Routes>
-      {/* Public Routes (Auth) */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+    // 👈 اضافه شدن DataProvider
+    <DataProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      {/* 
-        Note for Phase 2: 
-        Currently, these pages are public for UI demonstration.
-        In Phase 2, we will wrap them in a <ProtectedRoute /> component 
-        to enforce actual authentication redirection.
-      */}
-      <Route path="/home" element={<Home />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/artist/:id" element={<ArtistProfile />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/terms" element={<TermsPrivacy />} />
-      <Route path="/privacy" element={<TermsPrivacy />} />
-      <Route path="/artist-terms" element={<TermsPrivacy />} />
-
-      {/* Root Route - Redirect based on Authentication State */}
-      <Route
-        path="/"
-        element={
-          user ? (
-            <Navigate to="/home" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-
-      {/* Catch-all Route */}
-      {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
-    </Routes>
+        <Route path="/home" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/artist/:id" element={<ArtistProfile />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/terms" element={<TermsPrivacy />} />
+        <Route path="/privacy" element={<TermsPrivacy />} />
+        <Route path="/artist-terms" element={<TermsPrivacy />} />
+        <Route path="/artist-dashboard" element={<ArtistDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/support" element={<SupportPage />} />
+        
+        <Route path="/" element={user ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
+      </Routes>
+    </DataProvider>
   );
 }
 

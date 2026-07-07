@@ -1,0 +1,366 @@
+.settings-page {
+  flex: 1;
+  /*height: 100%;*/
+  /*overflow-y: auto;*/
+  background: #121212;
+  padding-top: 0;
+}
+
+.settings-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+
+.settings-title {
+  font-size: 48px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 32px;
+}
+
+.settings-empty {
+  color: #b3b3b3;
+}
+
+/* Section */
+.settings-section {
+  background: #282828;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px;
+}
+
+.section-description {
+  font-size: 14px;
+  color: #b3b3b3;
+  margin-bottom: 16px;
+}
+
+/* Form */
+.settings-form {
+  max-width: 480px;
+}
+
+.settings-form .form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-form label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.settings-form input {
+  background: #282828;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 12px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.settings-form input:focus {
+  outline: none;
+  border-color: #1db954;
+}
+
+.form-error {
+  color: #f44336;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.form-success {
+  color: #1db954;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.btn-primary {
+  background: #1db954;
+  border: none;
+  color: #000;
+  padding: 12px 32px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: transform 0.1s;
+}
+
+.btn-primary:hover {
+  transform: scale(1.03);
+}
+
+/* Subscription Plans */
+.subscription-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.plan-card {
+  background: #282828;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.plan-card.active {
+  border-color: #1db954;
+}
+
+.plan-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px;
+}
+
+.plan-price {
+  font-size: 16px;
+  color: #b3b3b3;
+  margin-bottom: 16px;
+}
+
+.plan-badge {
+  display: inline-block;
+  background: #1db954;
+  color: #000;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.btn-plan {
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.btn-plan:hover {
+  background: #fff;
+  color: #000;
+}
+
+/* Payment History */
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.payment-table th,
+.payment-table td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid #282828;
+}
+
+.payment-table th {
+  font-size: 13px;
+  font-weight: 700;
+  color: #b3b3b3;
+  text-transform: uppercase;
+}
+
+.payment-table td {
+  font-size: 14px;
+  color: #fff;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-paid {
+  background: #1db954;
+  color: #000;
+}
+
+/* Delete Account */
+.danger-section {
+  border: 2px solid #f44336;
+}
+
+.btn-danger {
+  background: #f44336;
+  border: none;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.btn-danger:hover {
+  transform: scale(1.03);
+}
+
+.confirm-delete {
+  max-width: 400px;
+}
+
+.confirm-text {
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.confirm-input {
+  background: #282828;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 12px;
+  color: #fff;
+  font-size: 14px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.confirm-input:focus {
+  outline: none;
+  border-color: #f44336;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #727272;
+  color: #fff;
+  padding: 10px 28px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .settings-title {
+    font-size: 32px;
+  }
+
+  .subscription-plans {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-table {
+    font-size: 12px;
+  }
+
+  .payment-table th,
+  .payment-table td {
+    padding: 8px;
+  }
+}
+
+/* ===== New Settings Components (Toggle & Select) ===== */
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #333;
+}
+
+.settings-row:last-child {
+  border-bottom: none;
+}
+
+.settings-row label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+}
+
+.settings-select {
+  background: #282828;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.settings-select:focus {
+  border-color: #1db954;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #535353;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #1db954;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}

@@ -60,6 +60,7 @@ export default function ArtistProfile() {
     <div className="home-layout">
       <Sidebar />
       <main className="artist-page">
+        
         <ArtistHeader
           artist={artist}
           following={following}
