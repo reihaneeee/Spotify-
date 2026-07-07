@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { getSongs, getAlbums } from '../../utils/mockData';
 import { usePlayback } from '../../context/PlaybackContext';
 
-export default function MusicArchive() {
+export default function MusicArchive({ onSelectAlbum }) { // 👈 دریافت پراپ جدید جهت نمایش جزئیات
   const { playSong } = usePlayback();
   const location = useLocation();
   
@@ -13,15 +13,19 @@ export default function MusicArchive() {
   const [playlists, setPlaylists] = useState([]);
   const [activeMenuSongId, setActiveMenuSongId] = useState(null);
   
-  // استیت‌های جدید مدیریت انیمیشن دوطرفه (سبز برای اد / قرمز برای حذف)
   const [animatingCardId, setAnimatingCardId] = useState(null);
-  const [animationType, setAnimationType] = useState('add'); // 'add' or 'remove'
+  const [animationType, setAnimationType] = useState('add'); 
 
   const allSongs = getSongs();
   const allAlbums = getAlbums();
 
   useEffect(() => {
-    setPlaylists(JSON.parse(localStorage.getItem('playlists') || '[]'));
+    const currentActiveUser = JSON.parse(localStorage.getItem('spotify_current_user') || '{}');
+    const userEmail = currentActiveUser.email || '';
+    
+    const stored = JSON.parse(localStorage.getItem('playlists') || '[]');
+    const userPlaylists = stored.filter(p => p.ownerEmail === userEmail || p.createdBy === userEmail);
+    setPlaylists(userPlaylists);
   }, [activeMenuSongId]);
 
   let displayItems = [];
@@ -51,19 +55,15 @@ export default function MusicArchive() {
     return a.title.localeCompare(b.title);
   });
 
-  // 🔴 تابع هوشمند دوطرفه: مدیریت خودکار افزودن یا حذف اثر از پلی‌لیست
   const toggleTrackInPlaylist = (playlistId, item, isAlreadyAdded) => {
     const allPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
     
     const updated = allPlaylists.map(p => {
       if (p.id === playlistId) {
         const currentSongs = p.songs || [];
-        
         if (isAlreadyAdded) {
-          // سناریو حذف: اثر از پلی‌لیست فیلتر و حذف می‌شود
           return { ...p, songs: currentSongs.filter(s => s.id !== item.id) };
         } else {
-          // سناریو افزودن: اثر به پلی‌لیست الحاق می‌شود
           return { ...p, songs: [...currentSongs, { ...item, itemType: item.itemType }] };
         }
       }
@@ -72,9 +72,8 @@ export default function MusicArchive() {
     
     localStorage.setItem('playlists', JSON.stringify(updated));
     setActiveMenuSongId(null);
-    setPlaylists(updated); // به‌روزرسانی زنده وضعیت منو
+    setPlaylists(prev => prev.map(p => p.id === playlistId ? { ...p, songs: isAlreadyAdded ? (p.songs || []).filter(s => s.id !== item.id) : [...(p.songs || []), item] } : p));
     
-    // 🟢 راه‌اندازی جلوه انیمیشنی متناسب با اکشن کاربر
     setAnimationType(isAlreadyAdded ? 'remove' : 'add');
     setAnimatingCardId(item.id);
     
@@ -84,35 +83,53 @@ export default function MusicArchive() {
   };
 
   return (
-    <div style={{ padding: '20px', color: '#fff', direction: 'rtl' }}>
-      <h3>
-        {location.pathname === '/singles' && '🎵 تک آهنگ‌های مستقل سامانه'}
-        {location.pathname === '/albums' && '🗂️ آلبوم‌های منتشر شده'}
-        {!['/singles', '/albums'].includes(location.pathname) && 'آرشیو و جستجوی موسیقی سامانه'}
+    <div style={{ padding: '30px 24px', color: '#fff', direction: 'ltr', fontFamily: 'sans-serif' }}>
+      
+      <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', letterSpacing: '-0.5px' }}>
+        {location.pathname === '/singles' && '🎵 Independent Singles'}
+        {location.pathname === '/albums' && '🗂️ Released Albums'}
+        {!['/singles', '/albums'].includes(location.pathname) && 'Music Archive & Search'}
       </h3>
 
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '28px', maxWidth: '600px' }}>
         <input 
           type="text" 
-          placeholder="جستجو بر اساس نام اثر یا هنرمند..." 
+          placeholder="Search track or artist..." 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{ padding: '10px', borderRadius: '4px', backgroundColor: '#181818', color: '#fff', border: '1px solid #444', flex: 1, textAlign: 'right' }}
+          style={{ 
+            padding: '10px 16px', 
+            borderRadius: '20px', 
+            backgroundColor: '#242424', 
+            color: '#fff', 
+            border: '1px solid #3e3e3e', 
+            flex: 1.5, 
+            fontSize: '14px',
+            outline: 'none'
+          }}
         />
         <select 
           value={sortBy} 
           onChange={(e) => setSortBy(e.target.value)} 
-          style={{ padding: '10px', backgroundColor: '#181818', color: '#fff', border: '1px solid #444', borderRadius: '4px', cursor: 'pointer' }}
+          style={{ 
+            padding: '10px 16px', 
+            backgroundColor: '#242424', 
+            color: '#fff', 
+            border: '1px solid #3e3e3e', 
+            borderRadius: '20px', 
+            cursor: 'pointer',
+            fontSize: '14px',
+            outline: 'none'
+          }}
         >
-          <option value="plays">مرتب‌سازی: تعداد شنونده</option>
-          <option value="title">مرتب‌سازی: حروف الفبا</option>
+          <option value="plays">Sort by: Most Played</option>
+          <option value="title">Sort by: Alphabetical</option>
         </select>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '24px' }}>
         {filteredItems.map(item => {
           const isAnimating = animatingCardId === item.id;
-          // تعیین رنگ انیمیشن بر اساس نوع اکشن (افزودن: سبز / حذف: قرمز)
           const targetBgColor = animationType === 'add' ? '#144c27' : '#5c1515';
           const targetBorderColor = animationType === 'add' ? '#1db954' : '#e91429';
           
@@ -120,62 +137,81 @@ export default function MusicArchive() {
             <div 
               key={item.id} 
               style={{ 
-                padding: '15px', 
+                padding: '16px', 
                 borderRadius: '8px', 
                 position: 'relative',
                 backgroundColor: isAnimating ? targetBgColor : '#181818', 
                 border: isAnimating ? `1px solid ${targetBorderColor}` : '1px solid transparent',
-                transition: 'background-color 0.2s ease, border 0.2s ease'
+                transition: 'background-color 0.2s ease, border 0.2s ease',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
               }}
             >
-              <img src={item.cover} alt="" style={{ width: '100%', borderRadius: '4px', marginBottom: '10px' }} />
-              <h4 style={{ margin: '5px 0', textAlign: 'right' }}>{item.title}</h4>
-              <p style={{ color: '#aaa', fontSize: '12px', margin: '5px 0', textAlign: 'right' }}>{item.artist || 'هنرمند سامانه'}</p>
+              <div style={{ position: 'relative', width: '100%', paddingTop: '100%', marginBottom: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+                <img src={item.cover} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '6px', objectFit: 'cover' }} />
+              </div>
+
+              <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</h4>
+              <p style={{ color: '#b3b3b3', fontSize: '13px', margin: '0 0 12px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.artist || 'Spotify Artist'}</p>
               
-              <span style={{ fontSize: '11px', color: '#1db954', backgroundColor: '#282828', padding: '2px 6px', borderRadius: '10px', display: 'inline-block', float: 'right' }}>
-                {item.itemType === 'song' ? 'تک آهنگ' : 'آلبوم'}
+              <span style={{ fontSize: '11px', color: '#1db954', backgroundColor: '#282828', padding: '3px 8px', borderRadius: '12px', fontWeight: '500' }}>
+                {item.itemType === 'song' ? 'Single' : 'Album'}
               </span>
 
-              <div style={{ clear: 'both', display: 'flex', gap: '5px', marginTop: '12px' }}>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
                 {item.itemType === 'song' ? (
                   <>
-                    <button onClick={() => playSong(item, displayItems.filter(s => s.itemType === 'song' && s.id !== item.id))} style={{ flex: 1, backgroundColor: '#1db954', border: 'none', color: '#fff', padding: '6px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>پخش</button>
-                    <button onClick={() => setActiveMenuSongId(activeMenuSongId === item.id ? null : item.id)} style={{ backgroundColor: '#333', border: 'none', color: '#fff', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>+</button>
+                    <button 
+                      onClick={() => playSong(item, displayItems.filter(s => s.itemType === 'song' && s.id !== item.id))} 
+                      style={{ flex: 1, backgroundColor: '#1db954', border: 'none', color: '#fff', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                    >
+                      Play
+                    </button>
+                    <button 
+                      onClick={() => setActiveMenuSongId(activeMenuSongId === item.id ? null : item.id)} 
+                      style={{ backgroundColor: '#282828', border: '1px solid #3e3e3e', color: '#fff', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      +
+                    </button>
                   </>
                 ) : (
                   <>
-                    <button style={{ flex: 1, backgroundColor: '#333', border: 'none', color: '#fff', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}>مشاهده آلبوم</button>
-                    <button onClick={() => setActiveMenuSongId(activeMenuSongId === item.id ? null : item.id)} style={{ backgroundColor: '#222', border: '1px solid #444', color: '#fff', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer' }}>+</button>
+                    {/* 🛠️ کلیک روی دکمه View Album حالا استیت والد را ست می‌کند */}
+                    <button 
+                      onClick={() => onSelectAlbum && onSelectAlbum(item)}
+                      style={{ flex: 1, backgroundColor: '#282828', border: '1px solid #3e3e3e', color: '#fff', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}
+                    >
+                      View Album
+                    </button>
+                    <button 
+                      onClick={() => setActiveMenuSongId(activeMenuSongId === item.id ? null : item.id)} 
+                      style={{ backgroundColor: '#282828', border: '1px solid #3e3e3e', color: '#fff', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      +
+                    </button>
                   </>
                 )}
               </div>
 
-              {/* منوی هوشمند پاپ‌آپ دوطرفه */}
               {activeMenuSongId === item.id && (
-                <div style={{ position: 'absolute', bottom: '50px', right: '10px', backgroundColor: '#282828', border: '1px solid #444', borderRadius: '4px', zIndex: 10, width: '170px', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-                  <div style={{ padding: '6px', fontSize: '11px', color: '#888', borderBottom: '1px solid #444', textAlign: 'right' }}>مدیریت در پلی‌لیست‌ها:</div>
-                  {playlists.map(p => {
-                    // 🔴 بررسی اینکه آیا این آهنگ/آلبوم در حال حاضر در این پلی‌لیست هست یا خیر
-                    const isAdded = (p.songs || []).some(s => s.id === item.id);
-                    
-                    return (
-                      <div 
-                        key={p.id} 
-                        onClick={() => toggleTrackInPlaylist(p.id, item, isAdded)} 
-                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', cursor: 'pointer', fontSize: '13px', textAlign: 'right', color: '#fff', transition: 'background 0.2s' }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#383838'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-                        {/* 🔴 رندر داینامیک علامت مثبت سبز یا منفی قرمز متناسب با وجود اثر */}
-                        {isAdded ? (
-                          <span style={{ color: '#e91429', fontWeight: 'bold', fontSize: '14px' }} title="حذف از لیست">➖</span>
-                        ) : (
-                          <span style={{ color: '#1db954', fontWeight: 'bold', fontSize: '14px' }} title="افزودن به لیست">➕</span>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div style={{ position: 'absolute', bottom: '56px', left: '16px', right: '16px', backgroundColor: '#282828', border: '1px solid #3e3e3e', borderRadius: '6px', zIndex: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.7)', padding: '4px' }}>
+                  <div style={{ padding: '6px 8px', fontSize: '11px', color: '#a7a7a7', borderBottom: '1px solid #3e3e3e', fontWeight: 'bold' }}>Add to playlist:</div>
+                  <div style={{ maxHeight: '120px', overflowY: 'auto' }}>
+                    {playlists.map(p => {
+                      const isAdded = (p.songs || []).some(s => s.id === item.id);
+                      return (
+                        <div 
+                          key={p.id} 
+                          onClick={() => toggleTrackInPlaylist(p.id, item, isAdded)} 
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', cursor: 'pointer', fontSize: '13px', color: '#fff', borderRadius: '4px', transition: 'background 0.2s' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3e3e3e'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                        >
+                          <span style={{ maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title || p.name}</span>
+                          <span>{isAdded ? '❌' : '➕'}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
