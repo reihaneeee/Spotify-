@@ -1,7 +1,7 @@
 // src/components/home/PlaylistManager.jsx
 import React, { useState, useEffect } from 'react';
 
-export default function PlaylistManager({ currentUser }) {
+export default function PlaylistManager({ currentUser, onSelectPlaylist }) {
   const [playlists, setPlaylists] = useState([]);
   const [nameInput, setNameInput] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -79,11 +79,18 @@ export default function PlaylistManager({ currentUser }) {
         <div style={{ textAlign: 'center', color: '#666' }}>پلی‌لیستی موجود نیست. اولین پلی‌لیست خود را بسازید!</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+          {/* کدهای داخل رندر PlaylistManager.jsx */}
           {playlists.map(p => (
-            <div key={p.id} style={{ backgroundColor: '#181818', padding: '15px', borderRadius: '6px' }}>
-              <img src={p.cover} alt="" style={{ width: '100%', borderRadius: '4px', marginBottom: '10px' }} />
-              <h4>{p.title}</h4>
-              <p style={{ fontSize: '12px', color: '#aaa' }}>تعداد آهنگ: {p.songs?.length || 0}</p>
+            <div 
+              key={p.id} 
+              style={{ backgroundColor: '#181818', padding: '15px', borderRadius: '6px' }}
+            >
+              {/* کلیک روی عکس یا اسم، تابع ورود به جزییات را صدا می‌زند */}
+              <div onClick={() => onSelectPlaylist ? onSelectPlaylist(p) : null} style={{ cursor: 'pointer' }}>
+                <img src={p.cover} alt="" style={{ width: '100%', borderRadius: '4px', marginBottom: '10px' }} />
+                <h4 style={{ margin: '0 0 5px 0' }}>{p.title}</h4>
+              </div>
+              <p style={{ fontSize: '12px', color: '#aaa', margin: '5px 0' }}>تعداد آهنگ: {p.songs?.length || 0}</p>
               <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                 <button onClick={() => handleRename(p.id, p.title)} style={{ fontSize: '12px', background: 'none', border: 'none', color: '#1db954', cursor: 'pointer' }}>تغییر نام</button>
                 <button onClick={() => handleDelete(p.id)} style={{ fontSize: '12px', background: 'none', border: 'none', color: '#e91429', cursor: 'pointer' }}>حذف</button>

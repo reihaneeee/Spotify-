@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import { useAuth } from './context/AuthContext';
 import TermsPrivacy from './pages/TermsPrivacy';
 import AdminDashboard from './pages/AdminDashboard';
+import Playlists from './pages/Playlists';
 
 // کامپوننت پخش‌کننده موسیقی ثابت و پرووایدر آن
 import MusicPlayerFixed from './components/home/MusicPlayerFixed';
@@ -93,7 +94,7 @@ function App() {
 
         {/* Note for Phase 2: Currently public for UI demonstration */}
         <Route path="/home" element={<Home />} />
-        <Route path="/playlists" element={<Home />} />
+        <Route path="/playlists" element={<Playlists />} />
         <Route path="/singles" element={<Home />} />
         <Route path="/albums" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
