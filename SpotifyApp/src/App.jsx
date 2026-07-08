@@ -51,7 +51,7 @@ function App() {
         console.log("✅ شرط درست بود: کاربر شنونده است و اشتراک طلایی ندارد.");
         
         const stored = JSON.parse(localStorage.getItem('spotify_notifications') || '[]');
-        const hasAlert = stored.some(n => n.targetEmail === user.email && n.text.includes('اشتراک'));
+        const hasAlert = stored.some(n => n.targetEmail === user.email && n.text.includes('subscription'));
         
         if (!hasAlert) {
           console.log("🚀 شلیک نوتیفیکیشن اتمام اشتراک به:", user.email);

@@ -199,6 +199,87 @@ export default function MusicArchive({ onSelectAlbum, onSelectArtist }) {
     }
   };
 
+  /* 🛠️ پیاده‌سازی متد جاافتاده handleCardClick برای مدیریت کلیک روی قطعات صوتی و آلبوم‌ها */
+  const handleCardClick = (item) => {
+    const rawUser = localStorage.getItem('currentUser') || '{}';
+    const activeUsername = JSON.parse(rawUser).username || 'anonymous';
+
+    if (item.itemType === 'song') {
+      const localSongs = JSON.parse(localStorage.getItem('songs') || '[]');
+      if (localSongs.some(s => s.id === item.id)) {
+        const updatedSongs = localSongs.map(s => {
+          if (s.id === item.id) {
+            const users = s.uniqueUsers || [];
+            if (!users.includes(activeUsername)) users.push(activeUsername);
+            return { ...s, plays: (s.plays || 0) + 1, uniqueUsers: users };
+          }
+          return s;
+        });
+        localStorage.setItem('songs', JSON.stringify(updatedSongs));
+      }
+
+      const storedWorks = JSON.parse(localStorage.getItem('artist_works') || '[]');
+      let isWorkUpdated = false;
+
+      const updatedWorks = storedWorks.map(w => {
+        if (w.id === item.id) {
+          const users = w.uniqueUsers || [];
+          if (!users.includes(activeUsername)) users.push(activeUsername);
+          isWorkUpdated = true;
+          return { ...w, plays: (w.plays || 0) + 1, uniqueUsers: users };
+        }
+        if (w.type === 'album' && w.tracks) {
+          const updatedTracks = w.tracks.map(t => {
+            if (t.id === item.id) {
+              const users = t.uniqueUsers || [];
+              if (!users.includes(activeUsername)) users.push(activeUsername);
+              isWorkUpdated = true;
+              return { ...t, plays: (t.plays || 0) + 1, uniqueUsers: users };
+            }
+            return t;
+          });
+          return { ...w, tracks: updatedTracks };
+        }
+        return w;
+      });
+
+      if (isWorkUpdated) {
+        localStorage.setItem('artist_works', JSON.stringify(updatedWorks));
+      }
+
+      fetchAndSyncData();
+      playSong(item, currentSongsState.filter(s => s.id !== item.id));
+
+    } else {
+      const localAlbums = JSON.parse(localStorage.getItem('albums') || '[]');
+      if (localAlbums.some(a => a.id === item.id)) {
+        const updatedAlbs = localAlbums.map(a => {
+          if (a.id === item.id) {
+            const users = a.uniqueUsers || [];
+            if (!users.includes(activeUsername)) users.push(activeUsername);
+            return { ...a, plays: (a.plays || 0) + 1, uniqueUsers: users };
+          }
+          return a;
+        });
+        localStorage.setItem('albums', JSON.stringify(updatedAlbs));
+      }
+
+      const storedWorks = JSON.parse(localStorage.getItem('artist_works') || '[]');
+      const updatedWorks = storedWorks.map(w => {
+        if (w.id === item.id && w.type === 'album') {
+          const users = w.uniqueUsers || [];
+          if (!users.includes(activeUsername)) users.push(activeUsername);
+          return { ...w, plays: (w.plays || 0) + 1, uniqueUsers: users };
+        }
+        return w;
+      });
+      localStorage.setItem('artist_works', JSON.stringify(updatedWorks));
+
+      fetchAndSyncData();
+      if (onSelectAlbum) onSelectAlbum(item);
+    }
+  };
+
   return (
     <div style={{ padding: '30px 24px', color: '#fff', direction: 'ltr', fontFamily: 'sans-serif' }}>
       <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px' }}>
@@ -240,11 +321,10 @@ export default function MusicArchive({ onSelectAlbum, onSelectArtist }) {
                 transition: 'background-color 0.25s ease, border 0.2s ease',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                 cursor: 'pointer',
-                /* 🛠️ فیکس باگ ۱: اختصاص مینی‌مم الگو برای ارتفاع کارت‌ها تا چیدمان ردیف گرید به‌هم نریزد */
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                minHeight: '350px',
+                minHeight: '370px',
                 boxSizing: 'border-box'
               }}
             >
@@ -291,7 +371,6 @@ export default function MusicArchive({ onSelectAlbum, onSelectArtist }) {
                   {item.artist || 'Spotify Artist'}
                 </p>
 
-                {/* تگ نمایش آلبوم درون کارت‌ها */}
                 {item.itemType === 'song' && (item.albumTitle || item.albumId) && (
                   <div style={{ margin: '4px 0 6px 0' }}>
                     <p 
@@ -309,8 +388,7 @@ export default function MusicArchive({ onSelectAlbum, onSelectArtist }) {
                 )}
               </div>
 
-              {/* آمار پخش زیر کارت‌ها و دکمه پلاس همواره در انتهای کادر ثابت می‌مانند */}
-              <div>
+              <div style={{ marginTop: 'auto' }}>
                 {isGoldUser && (
                   <div style={{ fontSize: '11px', color: '#6a6a6a', marginBottom: '8px', textAlign: 'left' }}>
                     <span>{item.plays || 0} plays</span> • <span>{(item.uniqueUsers || []).length} listeners</span>

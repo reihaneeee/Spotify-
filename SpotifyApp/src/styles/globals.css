@@ -10,3 +10,17 @@
   --danger-color: #e22134;
   --transition-speed: 0.3s;
 }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* جلوگیری از اسکرول یا بیرون‌زدگی افقی در تمام صفحات */
+  background-color: var(--bg-dark); /* همرنگ کردن پس‌زمینه مادر برای غیب شدن خط سفید */
+}
+
+/* اصلاح محاسبات پدینگ و مارجین تمام المان‌های فرزند */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
