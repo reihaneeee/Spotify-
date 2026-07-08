@@ -7,22 +7,18 @@ export default function NotificationsPanel({ currentUser }) {
   const navigate = useNavigate();
   const role = currentUser?.role || 'listener';
 
-  // src/components/home/NotificationsPanel.jsx
-
   useEffect(() => {
     if (currentUser) {
       const stored = localStorage.getItem('spotify_notifications');
       if (stored) {
         let allNotifications = JSON.parse(stored);
         
-        // ۱. حل ریشه‌ای مشکل کلید تکراری در فرانت‌اند: 
-        // حذفِ رکوردهای کاملاً همسان که در یک میلی‌ثانیه تکرار شده‌اند قبل از رندر
+        // Remove identical records
         const uniqueNotifications = allNotifications.filter((value, index, self) =>
           self.findIndex(n => n.id === value.id) === index
         );
 
-        // ۲. فیلتر اختصاصی و تفکیک‌شده:
-        // ادمین فقط نوتیف‌های مربوط به نقش 'admin' را می‌بیند و بقیه کاربران نوتیف‌های خودشان را
+        // Filter based on userType and role
         const filtered = currentUser.userType === 'admin'
           ? uniqueNotifications.filter(n => n.role === 'admin')
           : uniqueNotifications.filter(n => n.targetEmail === currentUser.email || (n.role === currentUser.userType && !n.targetEmail));
@@ -38,87 +34,58 @@ export default function NotificationsPanel({ currentUser }) {
     setNotifications(updatedFilteredList);
     const allStored = JSON.parse(localStorage.getItem('spotify_notifications') || '[]');
     
-    // نگه‌داشتن اعلان‌های مربوط به دیگران و به‌روزرسانی بخش مربوط به این کاربر
     const otherNotifications = allStored.filter(n => {
-      if (currentUser.role === 'admin') return false;
-      return n.targetEmail !== currentUser.email && !(n.role === role && !n.targetEmail);
+      if (currentUser.userType === 'admin') return n.role !== 'admin';
+      return n.targetEmail !== currentUser.email && !(n.role === currentUser.userType && !n.targetEmail);
     });
     
     localStorage.setItem('spotify_notifications', JSON.stringify([...otherNotifications, ...updatedFilteredList]));
   };
 
-  // src/components/home/NotificationsPanel.jsx
-
-  // ۱. تابع علامت‌گذاری به عنوان خوانده شده (اصلاح شده)
-  const handleMarkAsRead = (id) => {
+  const handleMarkAsRead = (id, e) => {
+    if (e) e.stopPropagation();
     const stored = JSON.parse(localStorage.getItem('spotify_notifications') || '[]');
-    
-    // آپدیت دیتای اصلی در لوکال استوریج
     const updatedAll = stored.map(n => n.id === id ? { ...n, read: true } : n);
     localStorage.setItem('spotify_notifications', JSON.stringify(updatedAll));
-    
-    // آپدیت آنی دیتای فیلتر شده روی صفحه
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
-  // ۲. تابع حذف یک اعلان خاص (اصلاح شده)
-  const handleDeleteNotification = (id) => {
+  const handleDeleteNotification = (id, e) => {
+    if (e) e.stopPropagation();
     const stored = JSON.parse(localStorage.getItem('spotify_notifications') || '[]');
-    
-    // حذف از دیتای اصلی لوکال استوریج
     const updatedAll = stored.filter(n => n.id !== id);
     localStorage.setItem('spotify_notifications', JSON.stringify(updatedAll));
-    
-    // حذف آنی از روی صفحه
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  // ۳. تابع خواندن همه اعلانات (اصلاح شده)
   const handleMarkAllAsRead = () => {
     const stored = JSON.parse(localStorage.getItem('spotify_notifications') || '[]');
-    
     const updatedAll = stored.map(n => {
-      if (currentUser.userType === 'admin' && n.role === 'admin') {
-        return { ...n, read: true };
-      }
-      if (n.targetEmail === currentUser.email) {
-        return { ...n, read: true };
-      }
+      if (currentUser.userType === 'admin' && n.role === 'admin') return { ...n, read: true };
+      if (n.targetEmail === currentUser.email) return { ...n, read: true };
       return n;
     });
-    
     localStorage.setItem('spotify_notifications', JSON.stringify(updatedAll));
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
-
-  const markAsRead = (id, e) => {
-    if (e) e.stopPropagation();
-    updateStorage(notifications.map(n => n.id === id ? { ...n, read: true } : n));
-  };
-
-  const deleteNotification = (id, e) => {
-    if (e) e.stopPropagation();
-    updateStorage(notifications.filter(n => n.id !== id));
-  };
-
-  const markAllAsRead = () => {
-    updateStorage(notifications.map(n => ({ ...n, read: true })));
-  };
-
   const handleNotificationClick = (n) => {
-    if (!n.read) markAsRead(n.id, null);
-    if (n.link) navigate(n.link); // هدایت مستقیم کاربر در صورت وجود لینک اثر یا پنل
+    if (!n.read) {
+      const stored = JSON.parse(localStorage.getItem('spotify_notifications') || '[]');
+      const updatedAll = stored.map(item => item.id === n.id ? { ...item, read: true } : item);
+      localStorage.setItem('spotify_notifications', JSON.stringify(updatedAll));
+    }
+    if (n.link) navigate(n.link);
   };
 
-  // وضعیت خالی (Empty State) طبق سند فاز اول
   if (notifications.length === 0) {
     return (
       <div style={{
         padding: '30px', textAlign: 'center', color: '#b3b3b3',
-        backgroundColor: '#181818', borderRadius: '8px', border: '1px dashed #333', marginBottom: '25px'
+        backgroundColor: '#181818', borderRadius: '8px', border: '1px dashed #333', marginBottom: '25px',
+        direction: 'ltr', fontFamily: 'sans-serif'
       }}>
-        <p style={{ margin: 0, fontSize: '14px' }}>🔔 هیچ اعلان جدید یا قدیمی برای شما وجود ندارد.</p>
+        <p style={{ margin: 0, fontSize: '14px' }}>🔔 You have no notifications.</p>
       </div>
     );
   }
@@ -126,15 +93,15 @@ export default function NotificationsPanel({ currentUser }) {
   return (
     <div style={{
       backgroundColor: '#181818', padding: '20px', borderRadius: '8px',
-      marginBottom: '25px', direction: 'rtl', fontFamily: 'Arial, sans-serif'
+      marginBottom: '25px', direction: 'ltr', fontFamily: 'sans-serif'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-        <h3 style={{ margin: 0, color: '#fff', fontSize: '18px' }}>مرکز اعلانات سامانه</h3>
+        <h3 style={{ margin: 0, color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>Notifications Center</h3>
         <button 
           onClick={handleMarkAllAsRead} 
           style={{ background: 'none', border: 'none', color: '#1db954', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
         >
-          ✓ خواندن همه اعلانات
+          ✓ Mark all as read
         </button>
       </div>
 
@@ -147,36 +114,45 @@ export default function NotificationsPanel({ currentUser }) {
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               padding: '14px 16px', borderRadius: '6px', cursor: n.link ? 'pointer' : 'default',
               backgroundColor: n.read ? '#121212' : '#282828',
-              borderRight: n.read ? '4px solid #444' : '4px solid #1db954',
+              borderLeft: n.read ? '4px solid #444' : '4px solid #1db954',
               transition: 'background-color 0.2s ease'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               {!n.read && (
                 <span style={{
-                  width: '8px', height: '8px', backgroundColor: '#0070f3',
+                  width: '8px', height: '8px', backgroundColor: '#1db954',
                   borderRadius: '50%', display: 'inline-block'
                 }}></span>
               )}
               <span style={{ color: n.read ? '#b3b3b3' : '#fff', fontSize: '14px' }}>
-                {n.text}
+                {/* ترجمه داینامیک پیام‌های فارسی سیستم به انگلیسی روان */}
+                {n.text
+                  .replace('⚠️ هشدار مهلت اشتراک: مهارت اشتراک ویژه شما به اتمام رسیده است. جهت تمدید و دسترسی نامحدود به بخش اشتراک‌ها مراجعه کنید.', '⚠️ Subscription Expiry Warning: Your premium access has expired. Please renew in settings.')
+                  .replace('✉️ تیکت جدید: کاربر با آیدی', '✉️ New Ticket: User [')
+                  .replace('ثبت کرده است.', 'has submitted a new ticket.')
+                  .replace('ثبت کرده و درخواست بررسی مدارک را دارد.', 'has registered and requested verification.')
+                  .replace('قطعه جدیدی به نام', 'released a new single named')
+                  .replace('منتشر کرد!', '!')}
               </span>
             </div>
 
             <div style={{ display: 'flex', gap: '8px' }}>
               {!n.read && (
                 <button 
-                  onClick={(e) => {e.stopPropagation(); handleMarkAsRead(n.id, e);}}
-                  style={{ backgroundColor: '#333', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                  onClick={(e) => handleMarkAsRead(n.id, e)}
+                  style={{ backgroundColor: '#333', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}
                 >
-                  خواندم
+                  Read
                 </button>
               )}
               <button 
-                onClick={(e) => {e.stopPropagation(); handleDeleteNotification(n.id, e);}}
-                style={{ backgroundColor: '#e91429', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                onClick={(e) => handleDeleteNotification(n.id, e)}
+                style={{ backgroundColor: '#282828', color: '#b3b3b3', border: '1px solid #3e3e3e', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                onMouseOver={(e) => e.currentTarget.style.color = '#e91429'}
+                onMouseOut={(e) => e.currentTarget.style.color = '#b3b3b3'}
               >
-                حذف
+                Delete
               </button>
             </div>
           </div>

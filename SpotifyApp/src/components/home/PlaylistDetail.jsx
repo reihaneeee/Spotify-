@@ -1,173 +1,418 @@
 // src/components/home/PlaylistDetail.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePlayback } from '../../context/PlaybackContext';
-import { getSongs, getAlbums } from '../../utils/mockData';
+import { getSongs, getAlbums, getPublishedWorks } from '../../utils/mockData';
+import { Music, ArrowLeft, Minus, ChevronDown, ChevronUp } from 'lucide-react';
 
-export default function PlaylistDetail({ playlist, onBack }) {
+export default function PlaylistDetail({ playlist, onBack, onSelectAlbum, onSelectArtist }) {
   const { playSong } = usePlayback();
+  const [currentSongsList, setCurrentSongsList] = useState(playlist.songs || []);
   
-  const allSongs = getSongs();
-  const allAlbums = getAlbums();
-
-  const [songSearch, setSongSearch] = useState('');
-  const [songResults, setSongResults] = useState([]);
+  const [trackSearch, setTrackSearch] = useState('');
   const [albumSearch, setAlbumSearch] = useState('');
-  const [albumResults, setAlbumResults] = useState([]);
 
-  const [currentItems, setCurrentItems] = useState(playlist?.songs || []);
+  // استیت نگهداری آیدی آلبوم‌های باز شده (Expanded)
   const [expandedAlbumIds, setExpandedAlbumIds] = useState({});
 
-  const toggleAlbumExpand = (albumId) => {
-    setExpandedAlbumIds(prev => ({ ...prev, [albumId]: !prev[albumId] }));
-  };
+  // استیت‌های مدیریت Rename درجا با کلیک روی نام پلی‌لیست
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [playlistTitle, setPlaylistTitle] = useState(playlist.title || playlist.name || '');
 
-  const handleSongSearchKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      if (!songSearch.trim()) { setSongResults([]); return; }
-      const filtered = allSongs.filter(song => 
-        song.title.toLowerCase().includes(songSearch.toLowerCase()) ||
-        (song.artist && song.artist.toLowerCase().includes(songSearch.toLowerCase()))
-      );
-      setSongResults(filtered);
-    }
-  };
+  useEffect(() => {
+    setPlaylistTitle(playlist.title || playlist.name || '');
+    setIsEditingName(false);
+    setCurrentSongsList(playlist.songs || []);
+  }, [playlist.id, playlist.songs]);
 
-  const handleAlbumSearchKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      if (!albumSearch.trim()) { setAlbumResults([]); return; }
-      const filtered = allAlbums.filter(album => 
-        album.title.toLowerCase().includes(albumSearch.toLowerCase()) ||
-        (album.artist && album.artist.toLowerCase().includes(albumSearch.toLowerCase()))
-      );
-      setAlbumResults(filtered);
-    }
-  };
-
-  const handleAddSong = (song) => {
+  // تابع ثبت تغییر نام پلی‌لیست در لوکال استوریج با زدن دکمه اینتر
+  const handleRenamePlaylist = () => {
+    if (!playlistTitle.trim()) return;
+    
     const allPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
-    if (currentItems.some(item => item.id === song.id && item.itemType === 'song')) return;
-
-    const songEntity = {
-      ...song,
-      itemType: 'song',
-      albumId: song.albumId || null,
-      albumTitle: song.albumTitle || null,
-      plays: song.plays || 0,         
-      listeners: song.listeners || [] 
-    };
-
-    const updatedItems = [...currentItems, songEntity];
-    updateLocalStorage(allPlaylists, updatedItems);
-  };
-
-  const handleAddAlbum = (album) => {
-    const allPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
-    if (currentItems.some(item => item.id === album.id && item.itemType === 'album')) return;
-
-    const albumTracks = allSongs.filter(s => s.albumId === album.id).map(track => ({
-      ...track,
-      itemType: 'song',
-      albumId: album.id,
-      albumTitle: album.title,
-      plays: track.plays || 0,
-      listeners: track.listeners || []
-    }));
-
-    const albumEntity = {
-      ...album,
-      itemType: 'album',
-      plays: album.plays || 0,
-      listeners: album.listeners || [],
-      tracks: albumTracks.length > 0 ? albumTracks : [
-        { id: `track_${album.id}_1`, title: `${album.title} - Track 1`, artist: album.artist, cover: album.cover, albumId: album.id, itemType: 'song', plays: 0, listeners: [] },
-        { id: `track_${album.id}_2`, title: `${album.title} - Track 2`, artist: album.artist, cover: album.cover, albumId: album.id, itemType: 'song', plays: 0, listeners: [] }
-      ]
-    };
-
-    const updatedItems = [...currentItems, albumEntity];
-    updateLocalStorage(allPlaylists, updatedItems);
-  };
-
-  const updateLocalStorage = (allPlaylists, updatedItems) => {
-    const updatedPlaylists = allPlaylists.map(p => {
-      if (p.id === playlist.id) return { ...p, songs: updatedItems };
+    const updated = allPlaylists.map(p => {
+      if (p.id === playlist.id) {
+        return { 
+          ...p, 
+          title: playlistTitle.trim(), 
+          name: playlistTitle.trim() 
+        };
+      }
       return p;
     });
+
+    localStorage.setItem('playlists', JSON.stringify(updated));
+    playlist.title = playlistTitle.trim(); 
+    playlist.name = playlistTitle.trim();
+    setIsEditingName(false);
+  };
+
+  const handleRenameKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleRenamePlaylist();
+    } else if (e.key === 'Escape') {
+      setPlaylistTitle(playlist.title || playlist.name || '');
+      setIsEditingName(false);
+    }
+  };
+
+  // تابع حذف قطعه صوتی یا آلبوم از همین پلی‌لیست فعلی و ذخیره در لوکال استوریج
+  const handleRemoveTrackFromPlaylist = (itemId) => {
+    const allPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
+    const updatedPlaylists = allPlaylists.map(p => {
+      if (p.id === playlist.id) {
+        const remainingSongs = (p.songs || []).filter(s => s.id !== itemId);
+        return { ...p, songs: remainingSongs };
+      }
+      return p;
+    });
+
     localStorage.setItem('playlists', JSON.stringify(updatedPlaylists));
-    setCurrentItems(updatedItems);
+    const filteredSongs = currentSongsList.filter(s => s.id !== itemId);
+    setCurrentSongsList(filteredSongs);
+    playlist.songs = filteredSongs; 
+    alert('Item removed from this playlist.');
+  };
+
+  // جلوگیری از اضافه کردن آهنگ یا آلبوم تکراری به پلی‌لیست
+  const handleAddItemToCurrentPlaylist = (item, isAlbum = false) => {
+    const allPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
+    
+    if (currentSongsList.some(s => s.id === item.id)) {
+      alert(`This ${isAlbum ? 'album' : 'track'} is already in this playlist!`);
+      return;
+    }
+
+    const itemToAdd = {
+      ...item,
+      itemType: isAlbum ? 'album' : 'song',
+      src: item.src || item.audioUrl || item.audioData || ''
+    };
+
+    const updatedPlaylists = allPlaylists.map(p => {
+      if (p.id === playlist.id) {
+        const currentSongs = p.songs || [];
+        return { ...p, songs: [...currentSongs, itemToAdd] };
+      }
+      return p;
+    });
+
+    localStorage.setItem('playlists', JSON.stringify(updatedPlaylists));
+    
+    const updatedList = [...currentSongsList, itemToAdd];
+    setCurrentSongsList(updatedList);
+    playlist.songs = updatedList; 
+    setTrackSearch('');
+    setAlbumSearch('');
+    alert('Added to playlist successfully!');
+  };
+
+  // یکپارچه‌سازی و همگام‌سازی کامل دیتای سرچ با منطق واکشی پویای موزیک آرشیو
+  const getAllUnifiedData = () => {
+    let publishedWorks = [];
+    try {
+      const storedWorks = localStorage.getItem('publishedWorks');
+      publishedWorks = storedWorks ? JSON.parse(storedWorks) : getPublishedWorks();
+    } catch (e) {
+      publishedWorks = getPublishedWorks();
+    }
+    
+    const mockSongs = getSongs();
+    const userSongs = publishedWorks
+      .filter(w => w.type === 'single' || w.type === 'track')
+      .map(w => ({
+        id: w.id,
+        title: w.title,
+        artist: w.artistName || 'artist6',
+        artistId: w.artistId,
+        cover: w.cover && !w.cover.includes('placeholder') ? w.cover : null,
+        plays: w.plays || 0,
+        duration: w.duration || 198,
+        lyrics: w.lyrics || '',
+        itemType: 'song',
+        albumTitle: w.albumTitle || '', 
+        src: w.audioUrl || w.audioData || '' 
+      }));
+    const allSongs = [...mockSongs.map(s => ({ ...s, itemType: 'song', src: s.src || '' })), ...userSongs];
+
+    const mockAlbums = getAlbums();
+    const userAlbums = publishedWorks
+      .filter(w => w.type === 'album')
+      .map(w => ({
+        id: w.id,
+        title: w.title,
+        artist: w.artistName || 'Uploaded Artist',
+        artistId: w.artistId,
+        cover: w.cover && !w.cover.includes('placeholder') ? w.cover : null,
+        year: w.releaseDate ? new Date(w.releaseDate).getFullYear() : new Date().getFullYear(),
+        itemType: 'album',
+        plays: w.plays || 0,
+        tracks: w.tracks || []
+      }));
+    const allAlbums = [...mockAlbums.map(a => ({ ...a, itemType: 'album' })), ...userAlbums];
+
+    return { allSongs, allAlbums };
+  };
+
+  const { allSongs, allAlbums } = getAllUnifiedData();
+
+  const searchedTracks = trackSearch ? allSongs.filter(s => s.title?.toLowerCase().includes(trackSearch.toLowerCase()) || s.artist?.toLowerCase().includes(trackSearch.toLowerCase())) : [];
+  const searchedAlbums = albumSearch ? allAlbums.filter(a => a.title?.toLowerCase().includes(albumSearch.toLowerCase()) || a.artist?.toLowerCase().includes(albumSearch.toLowerCase())) : [];
+
+  const toggleExpandAlbum = (albumId) => {
+    setExpandedAlbumIds(prev => ({
+      ...prev,
+      [albumId]: !prev[albumId]
+    }));
   };
 
   return (
-    <div style={{ padding: '20px', color: '#fff', direction: 'ltr' }}>
-      <button onClick={onBack} style={{ backgroundColor: '#333', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', marginBottom: '20px', fontWeight: 'bold' }}>
-        ← Back to Playlists
+    <div style={{ color: '#fff', direction: 'ltr', fontFamily: 'sans-serif', textAlign: 'left', padding: '0 32px 40px 32px', boxSizing: 'border-box' }}>
+      
+      <button 
+        onClick={onBack} 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '6px', 
+          backgroundColor: '#242424', 
+          color: '#fff', 
+          border: '1px solid #3e3e3e', 
+          padding: '6px 12px', 
+          borderRadius: '20px', 
+          cursor: 'pointer', 
+          marginTop: '16px',
+          marginBottom: '24px', 
+          fontWeight: 'bold', 
+          fontSize: '11px' 
+        }}
+      >
+        <ArrowLeft size={13} /> Back to Playlists
       </button>
 
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '30px' }}>
-        <img src={playlist.cover} alt="" style={{ width: '100px', height: '100px', borderRadius: '8px' }} />
-        <div style={{ textAlign: 'left' }}>
+      <div style={{ display: 'flex', gap: '24px', alignItems: 'center', marginBottom: '30px' }}>
+        <img src={playlist.cover || 'https://via.placeholder.com/150'} alt="" style={{ width: '150px', height: '150px', borderRadius: '8px', objectFit: 'cover' }} />
+        <div>
           <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#1db954' }}>PLAYLIST</span>
-          <h2 style={{ fontSize: '32px', margin: '5px 0', fontWeight: '900' }}>{playlist.title || playlist.name}</h2>
-          <p style={{ margin: 0, color: '#b3b3b3', fontSize: '13px' }}>By {playlist.owner}</p>
+          
+          <div style={{ margin: '8px 0' }}>
+            {isEditingName ? (
+              <input
+                type="text"
+                value={playlistTitle}
+                onChange={(e) => setPlaylistTitle(e.target.value)}
+                onKeyDown={handleRenameKeyDown}
+                onBlur={handleRenamePlaylist}
+                autoFocus
+                style={{
+                  backgroundColor: '#242424',
+                  border: '2px solid #1db954',
+                  borderRadius: '6px',
+                  color: '#fff',
+                  fontSize: '32px',
+                  fontWeight: '800',
+                  padding: '4px 12px',
+                  outline: 'none',
+                  fontFamily: 'sans-serif',
+                  width: '100%',
+                  maxWidth: '400px'
+                }}
+              />
+            ) : (
+              <h2 
+                onClick={() => setIsEditingName(true)}
+                title="Click to rename"
+                style={{ 
+                  fontSize: '32px', 
+                  margin: 0, 
+                  fontWeight: '800', 
+                  cursor: 'pointer',
+                  display: 'inline-block',
+                  borderBottom: '1px dashed transparent',
+                  transition: 'border-color 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.borderBottomColor = '#1db954'}
+                onMouseOut={(e) => e.currentTarget.style.borderBottomColor = 'transparent'}
+              >
+                {playlistTitle}
+              </h2>
+            )}
+          </div>
+          {/* 🛠️ مورد ۱: حذف کامل خط متنی "Created by: ..." برای خلوت شدن هدر */}
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start' }}>
-        {/* Playlist Tracks Content */}
-        <div style={{ flex: 1, backgroundColor: '#121212', padding: '20px', borderRadius: '8px', minHeight: '400px' }}>
-          <h3 style={{ borderBottom: '1px solid #282828', paddingBottom: '10px', marginBottom: '15px', textAlign: 'left' }}>Tracks List</h3>
-          
-          {currentItems.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#b3b3b3', backgroundColor: '#181818', borderRadius: '8px', border: '1px dashed #333', marginTop: '50px' }}>
-              <p style={{ margin: 0, fontSize: '14px' }}>🔔 This playlist is currently empty. Use the search bars on the right to add music.</p>
-            </div>
+      <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+        
+        {/* ستون سمت چپ: قطعات و آلبوم‌های داخل پلی‌لیست */}
+        <div style={{ flex: 1, minWidth: '320px', backgroundColor: '#121212', padding: '24px', borderRadius: '8px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Tracks & Albums List</h3>
+          {currentSongsList.length === 0 ? (
+            <p style={{ color: '#b3b3b3', textAlign: 'center', padding: '20px' }}>This playlist is empty.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {currentItems.map((item, index) => {
-                if (item.itemType === 'song') {
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {currentSongsList.map((item, idx) => {
+                
+                // رندر کانتینر آلبوم در پلی‌لیست
+                if (item.itemType === 'album' || item.tracks) {
+                  const isExpanded = !!expandedAlbumIds[item.id];
+                  let subTracks = item.tracks || allSongs.filter(s => s.albumId === item.id || s.albumTitle === item.title);
+                  
                   return (
-                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderRadius: '4px', backgroundColor: '#181818' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <span style={{ color: '#aaa', width: '20px' }}>{index + 1}</span>
-                        <img src={item.cover} alt="" style={{ width: '40px', height: '40px', borderRadius: '4px' }} />
-                        <div style={{ textAlign: 'left' }}>
-                          <h4 style={{ margin: 0, fontSize: '14px' }}>{item.title}</h4>
-                          <p style={{ margin: 0, fontSize: '11px', color: '#b3b3b3' }}>{item.artist}</p>
+                    <div 
+                      key={item.id || idx} 
+                      style={{ 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        backgroundColor: '#1c1c1c', 
+                        borderRadius: '8px', 
+                        padding: '12px', 
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        /* 🛠️ مورد ۲: تعریف ترانزیشن نرم و شیک برای افکت تغییر رنگ پس‌زمینه آلبوم در هنگام هوور ماوس */
+                        transition: 'background-color 0.25s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#222222'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1c1c1c'}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <span style={{ color: '#a7a7a7', width: '20px', fontWeight: 'bold', fontSize: '14px' }}>{idx + 1}</span>
+                          
+                          <div style={{ width: '46px', height: '46px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                            <img src={item.cover || 'https://via.placeholder.com/150'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          </div>
+                          
+                          <div style={{ textAlign: 'left' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <h5 style={{ margin: 0, fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{item.title}</h5>
+                              <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#1db954', backgroundColor: 'rgba(29,185,84,0.1)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Album</span>
+                            </div>
+                            <span style={{ fontSize: '12px', color: '#b3b3b3' }}>{item.artist} • {subTracks.length} tracks</span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <button 
+                            onClick={() => toggleExpandAlbum(item.id)}
+                            style={{ backgroundColor: '#282828', border: '1px solid #3e3e3e', color: '#fff', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          >
+                            {isExpanded ? <><ChevronUp size={14}/> Collapse</> : <><ChevronDown size={14}/> Expand</>}
+                          </button>
+                          
+                          <button 
+                            onClick={() => handleRemoveTrackFromPlaylist(item.id)} 
+                            style={{ backgroundColor: '#282828', border: '1px solid #3e3e3e', color: '#b3b3b3', padding: '6px', borderRadius: '50%', cursor: 'pointer' }}
+                          >
+                            <Minus size={14} />
+                          </button>
                         </div>
                       </div>
-                      <button onClick={() => playSong(item, currentItems.filter(s => s.itemType === 'song' && s.id !== item.id))} style={{ backgroundColor: 'transparent', border: '1px solid #1db954', color: '#1db954', padding: '4px 12px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px' }}>Play</button>
+
+                      {/* آهنگ‌های داخل آلبوم باز شده با ساختار مینی‌کارت استاندارد */}
+                      {isExpanded && (
+                        <div style={{ marginTop: '12px', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', borderLeft: '2px solid #1db954' }}>
+                          {subTracks.map((subTrack, subIdx) => {
+                            const safeSub = { ...subTrack, itemType: 'song', src: subTrack.audioData || subTrack.audioUrl || subTrack.src || '' };
+                            return (
+                              <div 
+                                key={subTrack.id || subIdx} 
+                                style={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'space-between', 
+                                  padding: '10px 14px', 
+                                  backgroundColor: '#121212', 
+                                  borderRadius: '8px',
+                                  boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                                  transition: 'background-color 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a2222'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#121212'}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', overflow: 'hidden', flex: 1 }}>
+                                  <span style={{ color: '#a7a7a7', fontSize: '12px', width: '15px', fontWeight: 'bold' }}>{subIdx + 1}</span>
+                                  <div style={{ width: '38px', height: '38px', borderRadius: '4px', overflow: 'hidden', backgroundColor: '#282828', flexShrink: 0 }}>
+                                    <img src={subTrack.cover || item.cover || 'https://via.placeholder.com/150'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  </div>
+                                  <div style={{ textAlign: 'left', overflow: 'hidden' }}>
+                                    <h6 style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subTrack.title}</h6>
+                                    <span style={{ fontSize: '11px', color: '#b3b3b3' }}>{subTrack.artist || item.artist}</span>
+                                  </div>
+                                </div>
+                                <button 
+                                  onClick={() => playSong(safeSub, subTracks.map(t => ({ ...t, itemType: 'song', src: t.audioData || t.audioUrl || t.src || '' })).filter(t => t.id !== subTrack.id))}
+                                  style={{ backgroundColor: '#1db954', border: 'none', color: '#fff', padding: '5px 14px', borderRadius: '12px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}
+                                >
+                                  Play
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   );
                 }
 
-                const isExpanded = !!expandedAlbumIds[item.id];
+                // رندر استاندارد ردیف تک‌آهنگ
+                const safeTrack = { ...item, itemType: 'song', src: item.src || item.audioUrl || item.audioData || '' };
                 return (
-                  <div key={item.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <div onClick={() => toggleAlbumExpand(item.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', borderRadius: '4px', backgroundColor: '#242424', cursor: 'pointer', borderLeft: '4px solid #1db954' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <span style={{ color: '#aaa', width: '20px' }}>{index + 1}</span>
-                        <img src={item.cover} alt="" style={{ width: '40px', height: '40px', borderRadius: '4px' }} />
-                        <div style={{ textAlign: 'left' }}>
-                          <h4 style={{ margin: 0, fontSize: '14px', color: '#1db954' }}>🗂️ Album: {item.title}</h4>
-                          <p style={{ margin: 0, fontSize: '12px', color: '#aaa' }}>{item.artist}</p>
+                  <div 
+                    key={item.id || idx} 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between', 
+                      padding: '12px 16px', 
+                      backgroundColor: '#181818', 
+                      borderRadius: '8px', 
+                      position: 'relative',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                      transition: 'background-color 0.25s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#222222'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#181818'}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, overflow: 'hidden' }}>
+                      <span style={{ color: '#a7a7a7', width: '20px', fontWeight: 'bold', fontSize: '14px' }}>{idx + 1}</span>
+                      
+                      <div style={{ width: '46px', height: '46px', borderRadius: '4px', backgroundColor: '#282828', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
+                        {item.cover ? (
+                          <img src={item.cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <Music size={20} style={{ color: '#535353' }} />
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', textAlign: 'left', overflow: 'hidden' }}>
+                        <h5 style={{ margin: 0, fontSize: '14px', fontWeight: 'bold', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</h5>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          <span onClick={() => onSelectArtist && onSelectArtist(item.artistId || item.artist)} style={{ fontSize: '12px', color: '#b3b3b3', cursor: 'pointer' }}>
+                            {item.artist}
+                          </span>
+                          {item.albumTitle && (
+                            <span onClick={() => onSelectAlbum && onSelectAlbum({ title: item.albumTitle, artist: item.artist, id: item.albumId })} style={{ fontSize: '11px', color: '#1db954', cursor: 'pointer' }}>
+                              • 💿 {item.albumTitle}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <span style={{ color: '#1db954', fontSize: '12px' }}>{isExpanded ? '▲ Close Album' : '▼ Expand Album'}</span>
                     </div>
 
-                    {isExpanded && item.tracks && (
-                      <div style={{ paddingLeft: '30px', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '2px' }}>
-                        {item.tracks.map((track, tIndex) => (
-                          <div key={track.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '4px', backgroundColor: '#1c1c1c', borderLeft: '2px solid #555' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <span style={{ color: '#666', fontSize: '11px' }}>{index + 1}.{tIndex + 1}</span>
-                              <h5 style={{ margin: 0, fontSize: '13px', color: '#eee' }}>{track.title}</h5>
-                            </div>
-                            <button onClick={(e) => { e.stopPropagation(); playSong(track, item.tracks.filter(t => t.id !== track.id)); }} style={{ backgroundColor: '#1db954', border: 'none', color: '#fff', padding: '3px 10px', borderRadius: '12px', cursor: 'pointer', fontSize: '11px' }}>▶ Play</button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                      <button 
+                        onClick={() => playSong(safeTrack, currentSongsList.filter(t => !t.tracks && t.itemType !== 'album').map(t => ({ ...t, itemType: 'song', src: t.src || t.audioUrl || t.audioData || '' })).filter(t => t.id !== item.id))} 
+                        style={{ backgroundColor: '#1db954', border: 'none', color: '#fff', padding: '6px 16px', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', fontSize: '12px' }}
+                      >
+                        Play
+                      </button>
+                      <button 
+                        onClick={() => handleRemoveTrackFromPlaylist(item.id)} 
+                        style={{ backgroundColor: '#282828', border: '1px solid #3e3e3e', color: '#b3b3b3', padding: '6px', borderRadius: '50%', cursor: 'pointer' }}
+                      >
+                        <Minus size={14} />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -175,34 +420,61 @@ export default function PlaylistDetail({ playlist, onBack }) {
           )}
         </div>
 
-        {/* Search Sidebar Column */}
-        <div style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '20px', direction: 'ltr' }}>
-          <div style={{ backgroundColor: '#181818', padding: '15px', borderRadius: '8px' }}>
-            <h4 style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#b3b3b3', textAlign: 'left' }}>Search & Add Track</h4>
-            <input type="text" value={songSearch} onChange={(e) => setSongSearch(e.target.value)} onKeyDown={handleSongSearchKeyDown} placeholder="🔍 Track title... (Enter)" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #333', backgroundColor: '#282828', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
-            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-              {songResults.map(song => (
-                <div key={song.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px', backgroundColor: '#222', borderRadius: '4px' }}>
-                  <span style={{ fontSize: '12px', color: '#fff' }}>{song.title}</span>
-                  <button onClick={() => handleAddSong(song)} style={{ backgroundColor: '#1db954', border: 'none', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold' }}>＋</button>
-                </div>
-              ))}
-            </div>
+        {/* ستون سمت راست: باکس‌های جستجوی زنده دینامیک */}
+        <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* باکس Search & Add Track */}
+          <div style={{ backgroundColor: '#121212', padding: '20px', borderRadius: '8px' }}>
+            <h4 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '12px' }}>Search & Add Track</h4>
+            <input 
+              type="text" 
+              placeholder="🔍 Track title..." 
+              value={trackSearch}
+              onChange={(e) => setTrackSearch(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', boxSizing: 'border-box', backgroundColor: '#242424', border: '1px solid #3e3e3e', borderRadius: '6px', color: '#fff', fontSize: '13px', outline: 'none' }}
+            />
+            {searchedTracks.length > 0 && (
+              <div style={{ backgroundColor: '#181818', borderRadius: '6px', marginTop: '8px', maxHeight: '150px', overflowY: 'auto', border: '1px solid #282828' }}>
+                {searchedTracks.map(t => (
+                  <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid #242424' }}>
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', textAlign: 'left' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '600', display: 'block' }}>{t.title}</span>
+                      <span style={{ fontSize: '11px', color: '#b3b3b3' }}>{t.artist}</span>
+                    </div>
+                    <button onClick={() => handleAddItemToCurrentPlaylist(t, false)} style={{ backgroundColor: '#1db954', border: 'none', color: '#fff', fontSize: '11px', padding: '4px 10px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold' }}>Add</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div style={{ backgroundColor: '#181818', padding: '15px', borderRadius: '8px' }}>
-            <h4 style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#b3b3b3', textAlign: 'left' }}>Search & Add Album</h4>
-            <input type="text" value={albumSearch} onChange={(e) => setAlbumSearch(e.target.value)} onKeyDown={handleAlbumSearchKeyDown} placeholder="🔍 Album title... (Enter)" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #333', backgroundColor: '#282828', color: '#fff', fontSize: '13px', boxSizing: 'border-box' }} />
-            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '150px', overflowY: 'auto' }}>
-              {albumResults.map(album => (
-                <div key={album.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px', backgroundColor: '#222', borderRadius: '4px' }}>
-                  <span style={{ fontSize: '12px', color: '#fff' }}>{album.title}</span>
-                  <button onClick={() => handleAddAlbum(album)} style={{ backgroundColor: '#1db954', border: 'none', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold' }}>＋</button>
-                </div>
-              ))}
-            </div>
+          {/* باکس Search & Add Album */}
+          <div style={{ backgroundColor: '#121212', padding: '20px', borderRadius: '8px' }}>
+            <h4 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '12px' }}>Search & Add Album</h4>
+            <input 
+              type="text" 
+              placeholder="🔍 Album title..." 
+              value={albumSearch}
+              onChange={(e) => setAlbumSearch(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', boxSizing: 'border-box', backgroundColor: '#242424', border: '1px solid #3e3e3e', borderRadius: '6px', color: '#fff', fontSize: '13px', outline: 'none' }}
+            />
+            {searchedAlbums.length > 0 && (
+              <div style={{ backgroundColor: '#181818', borderRadius: '6px', marginTop: '8px', maxHeight: '150px', overflowY: 'auto', border: '1px solid #282828' }}>
+                {searchedAlbums.map(a => (
+                  <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid #242424' }}>
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px', textAlign: 'left' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '600', display: 'block' }}>{a.title}</span>
+                      <span style={{ fontSize: '11px', color: '#b3b3b3' }}>By {a.artist}</span>
+                    </div>
+                    <button onClick={() => handleAddItemToCurrentPlaylist(a, true)} style={{ backgroundColor: '#1db954', border: 'none', color: '#fff', fontSize: '11px', padding: '4px 10px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold' }}>Add</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
         </div>
+
       </div>
     </div>
   );

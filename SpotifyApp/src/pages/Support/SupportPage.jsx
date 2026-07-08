@@ -5,6 +5,7 @@ import { useData } from '../../context/DataContext';
 import Sidebar from '../../components/home/Sidebar';
 import styles from './SupportPage.module.css';
 import { BackIcon } from '../../components/icons';
+import { triggerNewTicketNotification } from '../../utils/notificationEngine'; // 👈 ۱. اضافه شدن موتور اعلان سیستم
 
 const SupportPage = () => {
   const { user } = useAuth();
@@ -24,23 +25,30 @@ const SupportPage = () => {
       alert('Please fill in subject and message.');
       return;
     }
+
+    const userId = user.id || user.username;
+
     addTicket({
-      userId: user.id || user.username,
+      userId: userId,
       userName: user.displayName || user.artistName || user.email,
       subject: subject,
       messages: [{ sender: 'user', text: message, timestamp: new Date().toISOString() }],
       createdAt: new Date().toISOString(),
     });
+
+    // 👈 ۲. شلیک خودکار اعلان سیستم برای باخبر کردن تمام ادمین‌ها در پنل مدیریت
+    triggerNewTicketNotification(userId, subject.trim());
+
     setSubject('');
     setMessage('');
-    alert('Ticket sent!');
+    alert('Ticket sent successfully!');
   };
 
   const handleUserReply = () => {
     if (!replyText.trim()) return;
     addUserReplyToTicket(selectedTicket.id, replyText);
     setReplyText('');
-    // به‌روزرسانی تیکت انتخاب شده
+    
     const updated = tickets.find(t => t.id === selectedTicket.id);
     if (updated) setSelectedTicket(updated);
   };
@@ -73,7 +81,6 @@ const SupportPage = () => {
                 ))}
               </div>
 
-              {/* 👇 فرم پاسخ برای کاربر */}
               <div className={styles.replyBox}>
                 <textarea
                   value={replyText}

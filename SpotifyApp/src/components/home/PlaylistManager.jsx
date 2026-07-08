@@ -7,14 +7,24 @@ export default function PlaylistManager({ currentUser, onSelectPlaylist }) {
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [isCreating, setIsCreating] = useState(false); 
 
+  // 🛠️ تایید و پیاده‌سازی قاطع هر ۳ سطح محدودیت اشتراک (basic, silver, gold)
   const subType = currentUser?.subscription || 'basic'; 
-  const limits = { basic: 6, silver: 100, gold: Infinity }; 
-  const maxLimit = limits[subType];
+  const limits = { basic: 6, silver: 20, gold: Infinity }; 
+  const maxLimit = limits[subType] || 6;
 
+  // بخش اصلاح شده لود پلی‌لیست‌ها در src/components/home/PlaylistManager.jsx
   useEffect(() => {
+    const rawUser = localStorage.getItem('currentUser') || localStorage.getItem('spotify_current_user') || '{}';
+    const currentActiveUser = JSON.parse(rawUser);
+    const userEmail = currentActiveUser.email || '';
+
     const stored = JSON.parse(localStorage.getItem('playlists') || '[]');
-    // هماهنگی با کلید ساختار ذخیره‌سازی شما
-    const userPlaylists = stored.filter(p => p.ownerEmail === currentUser?.email || p.createdBy === currentUser?.email);
+    
+    const userPlaylists = stored.filter(p => 
+      p.ownerEmail === userEmail || 
+      p.createdBy === userEmail ||
+      p.owner === (currentActiveUser.displayName || currentActiveUser.username)
+    );
     setPlaylists(userPlaylists);
   }, [currentUser]);
 
@@ -24,7 +34,7 @@ export default function PlaylistManager({ currentUser, onSelectPlaylist }) {
     const allPlaylists = JSON.parse(localStorage.getItem('playlists') || '[]');
 
     if (playlists.length >= maxLimit) {
-      alert(`❌ Playlist limit reached for your subscription type (${maxLimit}).`);
+      alert(`❌ Playlist limit reached for your ${subType} subscription type (${maxLimit}).`);
       return;
     }
 
@@ -72,7 +82,9 @@ export default function PlaylistManager({ currentUser, onSelectPlaylist }) {
           <h2 style={{ margin: 0, fontSize: '28px', fontWeight: 'bold', letterSpacing: '-0.5px' }}>
             My Playlists ({playlists.length} of {maxLimit === Infinity ? 'Unlimited' : maxLimit})
           </h2>
-          <p style={{ margin: '6px 0 0 0', color: '#a7a7a7', fontSize: '14px' }}>Create and manage your personal collections</p>
+          <p style={{ margin: '6px 0 0 0', color: '#a7a7a7', fontSize: '14px' }}>
+            Subscription Plan: <span style={{ color: '#1db954', fontWeight: 'bold', textTransform: 'uppercase' }}>{subType}</span>
+          </p>
         </div>
 
         {/* Action Button & Input */}
@@ -141,7 +153,7 @@ export default function PlaylistManager({ currentUser, onSelectPlaylist }) {
           {playlists.map(p => (
             <div 
               key={p.id} 
-              onClick={() => onSelectPlaylist && onSelectPlaylist(p)} // بازگشت به منطق استیت محلی شما برای جلوگیری از صفحه سیاه
+              onClick={() => onSelectPlaylist && onSelectPlaylist(p)} 
               style={{
                 backgroundColor: '#181818',
                 padding: '16px',

@@ -1,18 +1,16 @@
 // src/utils/notificationEngine.js
 
 /**
- * تابع پایه و سراسری برای ساخت و ذخیره یک اعلان در LocalStorage پلتفرم
+ * Global function to create and store system notifications in LocalStorage
  */
-// src/utils/notificationEngine.js
-
 export const createSystemNotification = ({ targetEmail, role, text, link = null }) => {
   const allNotifications = JSON.parse(localStorage.getItem('spotify_notifications') || '[]');
   
-  // حل مشکل کلید تکراری: ترکیب زمان دقیق، یک عدد تصادفی بزرگتر و طول آرایه برای تضمین ۱۰۰٪ یکتا بودن
+  // Guaranteeing 100% unique ID using timestamp, random number, and array length
   const uniqueId = `nt_${Date.now()}_${Math.floor(Math.random() * 1000000)}_${allNotifications.length}`;
 
   const newNotification = {
-    id: uniqueId, // آیدی کاملاً منحصربه‌فرد و ایمن
+    id: uniqueId, 
     targetEmail: targetEmail || null,
     role: role,
     text: text,
@@ -25,36 +23,37 @@ export const createSystemNotification = ({ targetEmail, role, text, link = null 
 };
 
 // ==========================================
-// سناریو ۱: اعلان اتمام اشتراک برای کاربر عادی
+// Scenario 1: Subscription Alert for regular users (Updated per request)
 // ==========================================
 export const triggerSubscriptionExpiryNotification = (userEmail) => {
   createSystemNotification({
     targetEmail: userEmail,
     role: 'listener',
-    text: '⚠️ هشدار مهلت اشتراک: مهارت اشتراک ویژه شما به اتمام رسیده است. جهت تمدید و دسترسی نامحدود به بخش اشتراک‌ها مراجعه کنید.',
-    link: '/settings' // یا لینک صفحه ارتقای اشتراک شما
+    // 👈 متنی که دقیقاً خواسته بودی: شما اشتراک ندارید لطفا برای دسترسی... تهیه کنید
+    text: '⚠️ Subscription Status: You do not have an active subscription. Please purchase a subscription plan to unlock and access all premium features.',
+    link: '/settings' 
   });
 };
 
 // ==========================================
-// سناریو ۲: اعلان انتشار آهنگ جدید به فالوورهای هنرمند
+// Scenario 2: New release notification sent to artist followers
 // ==========================================
 export const triggerNewReleaseNotification = (followerEmail, artistName, artistId, songTitle) => {
   createSystemNotification({
     targetEmail: followerEmail,
     role: 'listener',
-    text: `🎵 اثر جدید: هنرمند مورد علاقه شما "${artistName}" قطعه جدیدی به نام "${songTitle}" منتشر کرد!`,
-    link: `/artist/${artistId}` // لینک مستقیم به صفحه پروفایل هنرمند طبق نیازمندی
+    text: `🎵 New Release: Your favorite artist "${artistName}" has published a new track named "${songTitle}"!`,
+    link: `/artist/${artistId}` 
   });
 };
 
 // ==========================================
-// سناریو ۳: اعلان نتیجه بررسی احراز هویت به هنرمند (تایید یا رد با علت)
+// Scenario 3: Verification status response for artists (Accept / Reject)
 // ==========================================
 export const triggerArtistStatusNotification = (artistEmail, isAccepted, reason = "") => {
   const text = isAccepted
-    ? '🎉 تایید حساب: درخواست احراز هویت شما تایید شد! حساب کاربری هنری شما فعال گردید و اکنون می‌توانید آثار خود را منتشر کنید.'
-    : `❌ رد درخواست: درخواست احراز هویت شما رد شد. علت: ${reason || 'عدم تطابق مدارک ارسالی با سیاست‌های پلتفرم.'}`;
+    ? '🎉 Verification Approved: Your artist account verification request has been accepted. You can now publish your music!'
+    : `❌ Verification Rejected: Your artist request was declined. Reason: ${reason || 'Submitted documents do not match our platform policies.'}`;
 
   createSystemNotification({
     targetEmail: artistEmail,
@@ -65,37 +64,37 @@ export const triggerArtistStatusNotification = (artistEmail, isAccepted, reason 
 };
 
 // ==========================================
-// سناریو ۴: اعلان آپدیت محاسبات مالی جدید به هنرمند
+// Scenario 4: Financial update notification for artists
 // ==========================================
 export const triggerFinancialUpdateNotification = (artistEmail, monthName) => {
   createSystemNotification({
     targetEmail: artistEmail,
     role: 'artist',
-    text: `💰 اعلان مالی: محاسبات پاداش و درآمد حاصل از استریم‌های شما مربوط به ماه (${monthName}) انجام شد و در وضعیت آماده پرداخت قرار گرفت.`,
-    link: '/profile' // یا بخش ولت/درآمد در پروفایل هنرمند
+    text: `💰 Financial Update: Royalty earnings calculations for (${monthName}) are completed and ready for payout.`,
+    link: '/profile' 
   });
 };
 
 // ==========================================
-// سناریو ۵: اعلان تیکت جدید از سوی کاربر عادی برای ادمین/پشتیبان
+// Scenario 5: New ticket submitted by user for admins/support
 // ==========================================
 export const triggerNewTicketNotification = (userId, ticketSubject) => {
   createSystemNotification({
-    targetEmail: null, // عمومی برای تمام ادمین‌ها و پشتیبان‌ها
-    role: 'admin',      // یا support بسته به پیاده‌سازی روت‌ها
-    text: `✉️ تیکت جدید: کاربر با آیدی [${userId}] تیکت جدیدی با موضوع "${ticketSubject}" ثبت کرده است.`,
-    link: '/admin'     // هدایت به داشبورد ادمین بخش تیکت‌ها
+    targetEmail: null, 
+    role: 'admin',      
+    text: `✉️ New Ticket: User [${userId}] has submitted a new ticket with subject: "${ticketSubject}".`,
+    link: '/admin'     
   });
 };
 
 // ==========================================
-// سناریو ۶: اعلان درخواست جدید احراز هویت هنرمند برای ادمین
+// Scenario 6: Artist verification request for admins
 // ==========================================
 export const triggerArtistSignupNotification = (artistId, artistName) => {
   createSystemNotification({
-    targetEmail: null, // عمومی برای ادمین‌ها
+    targetEmail: null, 
     role: 'admin',
-    text: `🔍 احراز هویت: هنرمند جدید "${artistName}" با آیدی [${artistId}] ثبت‌نام کرده و درخواست بررسی مدارک را دارد.`,
-    link: '/admin'     // هدایت به بخش درخواست‌های در انتظار پنل مدیریت
+    text: `🔍 Verification Request: New artist "${artistName}" with ID [${artistId}] has registered and requested document review.`,
+    link: '/admin'     
   });
 };
