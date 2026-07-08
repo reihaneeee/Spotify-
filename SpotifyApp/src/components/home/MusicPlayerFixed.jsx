@@ -87,30 +87,40 @@ export default function MusicPlayerFixed({ currentUser }) {
   const currentSeconds = audioRef.current ? audioRef.current.currentTime : 0;
   const totalDurationSeconds = audioRef.current && !isNaN(audioRef.current.duration) ? audioRef.current.duration : (currentSong.duration || 198);
 
+  // 🛠️ فیکس قطعی: پیدا کردن آلبوم واقعی همراه با ترک‌ها و نمایش آن در صفحه آلبوم
   const handleNavigateToAlbum = () => {
     if (currentSong.albumTitle || currentSong.albumId) {
+      
+      // ۱. دریافت تمام آلبوم‌های موجود در سیستم برای پیدا کردن نسخه کامل آن
+      const localAlbums = JSON.parse(localStorage.getItem('albums') || '[]');
+      const artistWorks = JSON.parse(localStorage.getItem('artist_works') || '[]');
+      
+      // ۲. جستجو بر اساس ID یا عنوان آلبوم
+      let fullAlbumData = localAlbums.find(a => a.id === currentSong.albumId || a.title === currentSong.albumTitle) ||
+                         artistWorks.find(w => w.type === 'album' && (w.id === currentSong.albumId || w.title === currentSong.albumTitle));
+
+      // ۳. اگر آلبوم کامل پیدا نشد، یک آبجکت استاندارد می‌سازیم
+      if (!fullAlbumData) {
+        fullAlbumData = {
+          id: currentSong.albumId || `dyn_key_${currentSong.albumTitle}`,
+          title: currentSong.albumTitle,
+          artist: currentSong.artist,
+          cover: currentSong.cover,
+          itemType: 'album',
+          tracks: currentSong.tracks || [] // تلاش برای بازیابی ترک‌ها در صورت وجود
+        };
+      } else {
+        // اطمینان از اینکه نوع آیتم حتماً آلبوم پاس داده شود
+        fullAlbumData.itemType = 'album';
+      }
+
+      // ۴. شلیک رویداد سراسری با دیتای ۱۰۰٪ کامل آلبوم (شامل آهنگ‌ها) بدون ریدایرکت اشتباه
       window.dispatchEvent(new CustomEvent('globalSelectAlbum', { 
-        detail: { id: currentSong.albumId, title: currentSong.albumTitle, artist: currentSong.artist } 
+        detail: fullAlbumData 
       }));
     }
   };
-  // استخراج آمار لایو به صورت مستقیم از دیتابیس هنرمندان
-  const getLiveStats = () => {
-    const storedWorks = JSON.parse(localStorage.getItem('artist_works') || '[]');
-    for (const w of storedWorks) {
-      if (w.type === 'single' && w.id === currentSong.id) {
-        return { plays: w.plays || 0, listeners: w.listeners || (w.uniqueUsers || []).length || 0 };
-      }
-      if (w.type === 'album' && w.tracks) {
-        const track = w.tracks.find(t => t.id === currentSong.id);
-        if (track) {
-          return { plays: track.plays || 0, listeners: track.listeners || (track.uniqueUsers || []).length || 0 };
-        }
-      }
-    }
-    // فال‌بک برای موزیک‌های پیش‌فرض سیستم
-    return { plays: currentSong.plays || 0, listeners: currentSong.listeners || (currentSong.uniqueUsers || []).length || 0 };
-  };
+
   // 🛠️ مورد ۲: تابع کلیک جهت هدایت کاربر به پروفایل هنرمند اثر از درون نوار پخش
   const handleNavigateToArtist = () => {
     const storedArtists = JSON.parse(localStorage.getItem('artists') || '[]');
