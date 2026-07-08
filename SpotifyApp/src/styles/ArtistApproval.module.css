@@ -1,0 +1,140 @@
+/* src/pages/AdminDashboard/ArtistApproval.module.css */
+
+/* ===== Artist Approval ===== */
+.artistDetail {
+  animation: fadeIn 0.3s ease;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.backBtn:hover {
+  color: #fff;
+}
+
+.approvalActions {
+  margin-top: 1.5rem;
+}
+
+.approveBtn {
+  background: #1db954;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-right: 1rem;
+  transition: background 0.2s;
+  max-height: 40px;
+  text-align: center;
+}
+
+.approveBtn:hover {
+  background: #1ed760;
+}
+
+.rejectSection {
+  margin-top: 1rem;
+}
+
+.rejectSection textarea {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  color: #fff;
+  resize: vertical;
+}
+
+.rejectBtn {
+  max-height: 40px;
+  margin-top: 0.5rem;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.rejectBtn:hover {
+  background: #dc2626;
+}
+
+/* ===== Table ===== */
+.tableWrapper {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table thead {
+  background: #2a2a2a;
+}
+
+.table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #b3b3b3;
+  font-weight: 600;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.table tr:hover {
+  background: #222;
+}
+
+.viewBtn {
+  background: #1db954;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+
+.viewBtn:hover {
+  background: #1ed760;
+}
+
+.emptyMessage {
+  color: #b3b3b3;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

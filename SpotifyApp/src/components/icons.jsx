@@ -166,3 +166,113 @@ export const MoneyBagIcon = ({ size = 20, color = 'currentColor', className = ''
     <path d="M12 11v6M10 12.5h2.5a1.25 1.25 0 0 1 0 2.5H10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+
+
+// ===== آیکون‌های جدید برای MusicArchive, MusicPlayer, PlaylistDetail و Admin =====
+export const PlayIconForPlayList = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <polygon points="5,3 19,12 5,21" fill={color} stroke="none" />
+  </svg>
+);
+
+export const PauseIconForPlayList = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="6" y="4" width="4" height="16" fill={color} stroke="none" />
+    <rect x="14" y="4" width="4" height="16" fill={color} stroke="none" />
+  </svg>
+);
+
+export const ShuffleIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M16 3H21V8" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M4 20L21 3" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M21 16V21H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M15 9L21 3" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+export const RepeatIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M17 1L21 5L17 9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 11V9C3 5.68629 5.68629 3 9 3H21" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M7 23L3 19L7 15" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M21 13V15C21 18.3137 18.3137 21 15 21H3" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+export const VolumeIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M3 9H7L12 4V20L7 15H3V9Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M15 8C16.5 9.5 16.5 14.5 15 16" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M18 5C20.5 8 20.5 16 18 19" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+export const ListMusicIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M4 6H20" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M4 12H16" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M4 18H10" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M19 15V9L23 7V13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="17" cy="15" r="2" stroke={color} strokeWidth="2"/>
+    <circle cx="21" cy="13" r="2" stroke={color} strokeWidth="2"/>
+  </svg>
+);
+
+export const MinimizeIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M8 3V9H2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 3V9H22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M8 21V15H2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M16 21V15H22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const LyricsIconForPlayList = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M4 6H20" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M4 12H14" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M4 18H10" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <circle cx="18" cy="12" r="2" stroke={color} strokeWidth="2"/>
+    <path d="M20 12V16" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+export const XIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M18 6L6 18" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6 6L18 18" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const ChevronLeftIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M15 18L9 12L15 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const ChevronRightIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M9 18L15 12L9 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const ArrowLeftIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M19 12H5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M12 19L5 12L12 5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const PlusIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 5V19" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <path d="M5 12H19" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+export const MinusIcon = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M5 12H19" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);

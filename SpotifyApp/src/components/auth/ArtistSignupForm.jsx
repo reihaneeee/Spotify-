@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { registerArtist } from '../../utils/auth';
 import { validateEmail, validatePassword } from '../../utils/validation';
 import { Eye, EyeOff } from 'lucide-react';
+import { triggerArtistSignupNotification } from '../../utils/notificationEngine';
 
 /**
  * ArtistSignupForm Component
@@ -152,9 +153,11 @@ const ArtistSignupForm = () => {
         bio: formData.bio,
         portfolioLinks: formData.portfolioLinks.filter(link => link.trim() !== '')
       });
-
+      console.log("yyy")
       if (result.success) {
+        console.log("xxxx")
         setSubmitSuccess(true);
+        triggerArtistSignupNotification(formData.email, formData.artistName);
         // Artists need approval, don't auto-login
       } else {
         setErrors({ general: result.message });
@@ -286,7 +289,7 @@ const ArtistSignupForm = () => {
             aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             tabIndex="-1"
           >
-            {showConfirmPassword ? '🙈' : '👁️'}
+            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
         {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}

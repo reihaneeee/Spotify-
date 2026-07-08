@@ -1,11 +1,13 @@
 // src/components/settings/ManageSubscription.jsx
 
 import { useState } from 'react';
+const silverPrice = localStorage.getItem('sub_silver') || '150000';
+const goldPrice = localStorage.getItem('sub_gold') || '300000';
 
 const PLANS = [
   { id: 'basic', name: 'Basic', price: 'Free' },
-  { id: 'silver', name: 'Silver', price: '$4.99/mo' },
-  { id: 'gold', name: 'Gold', price: '$9.99/mo' },
+  { id: 'silver', name: 'Silver', price: silverPrice },
+  { id: 'gold', name: 'Gold', price: goldPrice },
 ];
 
 export default function ManageSubscription({ user, updateUser }) {

@@ -1,12 +1,13 @@
 // src/components/settings/PaymentHistory.jsx
 
 import { useState } from 'react';
-
+const silverPrice = localStorage.getItem('sub_silver') || '150000';
+const goldPrice = localStorage.getItem('sub_gold') || '300000';
 // داده‌های فیک برای تاریخچه پرداخت
 const MOCK_PAYMENTS = [
-  { id: 1, date: '2026-06-01', amount: '$9.99', plan: 'Gold', status: 'Paid' },
-  { id: 2, date: '2026-05-01', amount: '$9.99', plan: 'Gold', status: 'Paid' },
-  { id: 3, date: '2026-04-01', amount: '$4.99', plan: 'Silver', status: 'Paid' },
+  { id: 1, date: '2026-06-01', amount: goldPrice, plan: 'Gold', status: 'Paid' },
+  { id: 2, date: '2026-05-01', amount: goldPrice, plan: 'Gold', status: 'Paid' },
+  { id: 3, date: '2026-04-01', amount: silverPrice, plan: 'Silver', status: 'Paid' },
 ];
 
 export default function PaymentHistory() {

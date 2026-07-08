@@ -1,0 +1,73 @@
+/* src/pages/AdminDashboard/FinancialAudit.module.css */
+
+/* ===== Table ===== */
+.tableWrapper {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table thead {
+  background: #2a2a2a;
+}
+
+.table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #b3b3b3;
+  font-weight: 600;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.table tr:hover {
+  background: #222;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 500px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.statusBadge.pending {
+  background: #ffd700;
+  color: #000;
+}
+
+.statusBadge.paid {
+  background: #1db954;
+  color: #fff;
+}
+
+.payBtn {
+  background: #4a6cff;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+
+.payBtn:hover {
+  background: #5a7cff;
+}
+
+.emptyMessage {
+  color: #b3b3b3;
+  text-align: center;
+  padding: 2rem 0;
+}

@@ -43,7 +43,41 @@ export const initializeDefaultUsers = () => {
         password: 'Admin123!',
         displayName: 'Admin User',
         userType: 'admin',
+        role: 'admin',
         username: 'admin_1',
+        createdAt: new Date().toISOString()
+      },
+      // ۴. پشتیبان اول
+      { 
+        id: 'sup-1', 
+        username: 'support1', 
+        email: 'sup1@spotify.com', 
+        password: '123', 
+        userType: 'support', 
+        role: 'support', 
+        displayName: 'Support Ali',
+        createdAt: new Date().toISOString()
+      },
+      // ۵. پشتیبان دوم
+      { 
+        id: 'sup-2', 
+        username: 'support2', 
+        email: 'sup2@spotify.com', 
+        password: '123', 
+        userType: 'support', 
+        role: 'support', 
+        displayName: 'Support Sara',
+        createdAt: new Date().toISOString()
+      },
+      // ۶. پشتیبان سوم
+      { 
+        id: 'sup-3', 
+        username: 'support3', 
+        email: 'sup3@spotify.com', 
+        password: '123', 
+        userType: 'support', 
+        role: 'support', 
+        displayName: 'Support Reza',
         createdAt: new Date().toISOString()
       }
     ];
