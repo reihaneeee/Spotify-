@@ -9,15 +9,16 @@
 export const initMockData = () => {
   // Songs
   if (!localStorage.getItem('songs')) {
+    // 🛠️ فیکس مورد ۳: کم کردن مقادیر الکی و خیلی بزرگ ماک دیتا تا آهنگ‌های تست شما به راحتی بالا بیایند
     const songs = [
-      { id: 's1', title: 'Midnight City', artist: 'Neon Pulse', cover: 'https://picsum.photos/seed/s1/300', plays: 1820000, duration: 213 },
-      { id: 's2', title: 'Ocean Drive', artist: 'Coastal Waves', cover: 'https://picsum.photos/seed/s2/300', plays: 1540000, duration: 198 },
-      { id: 's3', title: 'Golden Hour', artist: 'Sunset Boulevard', cover: 'https://picsum.photos/seed/s3/300', plays: 2310000, duration: 225 },
-      { id: 's4', title: 'Electric Dreams', artist: 'Synth Riders', cover: 'https://picsum.photos/seed/s4/300', plays: 980000, duration: 187 },
-      { id: 's5', title: 'Paper Planes', artist: 'Indie Skies', cover: 'https://picsum.photos/seed/s5/300', plays: 1290000, duration: 241 },
-      { id: 's6', title: 'Velvet Sky', artist: 'Moonlit Trio', cover: 'https://picsum.photos/seed/s6/300', plays: 760000, duration: 205 },
-      { id: 's7', title: 'Lost Signals', artist: 'Echo Chamber', cover: 'https://picsum.photos/seed/s7/300', plays: 2050000, duration: 230 },
-      { id: 's8', title: 'Crimson Fields', artist: 'Aurora Lights', cover: 'https://picsum.photos/seed/s8/300', plays: 1110000, duration: 219 },
+      { id: 's1', title: 'Midnight City', artist: 'Neon Pulse', cover: 'https://picsum.photos/seed/s1/300', plays: 5, uniqueUsers: ['artist6'], duration: 213 },
+      { id: 's2', title: 'Ocean Drive', artist: 'Coastal Waves', cover: 'https://picsum.photos/seed/s2/300', plays: 3, uniqueUsers: ['artist6', 'user1'], duration: 198 },
+      { id: 's3', title: 'Golden Hour', artist: 'Sunset Boulevard', cover: 'https://picsum.photos/seed/s3/300', plays: 4, uniqueUsers: ['user2'], duration: 225 },
+      { id: 's4', title: 'Electric Dreams', artist: 'Synth Riders', cover: 'https://picsum.photos/seed/s4/300', plays: 2, uniqueUsers: [], duration: 187 },
+      { id: 's5', title: 'Paper Planes', artist: 'Indie Skies', cover: 'https://picsum.photos/seed/s5/300', plays: 1, uniqueUsers: [], duration: 241 },
+      { id: 's6', title: 'Velvet Sky', artist: 'Moonlit Trio', cover: 'https://picsum.photos/seed/s6/300', plays: 2, uniqueUsers: [], duration: 205 },
+      { id: 's7', title: 'Lost Signals', artist: 'Echo Chamber', cover: 'https://picsum.photos/seed/s7/300', plays: 3, uniqueUsers: [], duration: 230 },
+      { id: 's8', title: 'Crimson Fields', artist: 'Aurora Lights', cover: 'https://picsum.photos/seed/s8/300', plays: 0, uniqueUsers: [], duration: 219 },
     ];
     localStorage.setItem('songs', JSON.stringify(songs));
   }
@@ -48,7 +49,7 @@ export const initMockData = () => {
     localStorage.setItem('playlists', JSON.stringify(playlists));
   }
 
-  // Early access content (gold subscribers only)
+  // Early access content
   if (!localStorage.getItem('earlyAccess')) {
     const earlyAccess = [
       { id: 'e1', title: 'Unreleased Single', artist: 'Neon Pulse', cover: 'https://picsum.photos/seed/e1/300', releaseDate: '2026-07-10' },
@@ -66,8 +67,8 @@ export const initMockData = () => {
       bio: 'Electronic music producer blending ambient soundscapes with progressive beats.',
       avatar: 'https://i.pravatar.cc/200?img=33',
       verified: true,
-      listeners: 1250000,
-      streams: 45000000,
+      listeners: 125,
+      streams: 4500,
       albums: ['album-1', 'album-2'],
       singles: ['song-1', 'song-3'],
     },
@@ -77,8 +78,8 @@ export const initMockData = () => {
       bio: 'Singer-songwriter crafting indie folk stories with raw emotion.',
       avatar: 'https://i.pravatar.cc/200?img=44',
       verified: true,
-      listeners: 320000,
-      streams: 8500000,
+      listeners: 32,
+      streams: 850,
       albums: ['album-3'],
       singles: ['song-2', 'song-5'],
     },
@@ -88,8 +89,8 @@ export const initMockData = () => {
       bio: 'Alternative rock band pushing boundaries since 2018.',
       avatar: 'https://i.pravatar.cc/200?img=68',
       verified: true,
-      listeners: 2100000,
-      streams: 92000000,
+      listeners: 210,
+      streams: 9200,
       albums: ['album-4'],
       singles: ['song-4', 'song-6'],
     },
@@ -165,7 +166,6 @@ export function isFollowing(username, artistId) {
   return user?.following?.includes(artistId) ?? false;
 }
 
-// ===== FIX: Safe formatPlays to prevent crash on undefined =====
 export const formatPlays = (plays) => {
   if (plays === undefined || plays === null || plays === 0) return '0';
   if (plays >= 1000000) return `${(plays / 1000000).toFixed(1)}M`;
@@ -180,11 +180,9 @@ export const getPublishedWorks = () => {
   try {
     const allWorks = JSON.parse(stored);
     const now = new Date();
-    now.setHours(0, 0, 0, 0); // نادیده گرفتن ساعت برای مقایسه دقیق تاریخ
-    
-    // فیلتر کردن کارهایی که تاریخ انتشارشان رسیده یا گذشته است
+    now.setHours(0, 0, 0, 0);
     return allWorks.filter(work => {
-      if (!work.releaseDate) return true; // اگر تاریخی نداشت، منتشر شده فرض می‌شود
+      if (!work.releaseDate) return true;
       const releaseDate = new Date(work.releaseDate);
       releaseDate.setHours(0, 0, 0, 0);
       return releaseDate <= now;

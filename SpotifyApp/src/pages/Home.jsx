@@ -2,13 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom'; 
 import { useAuth } from '../context/AuthContext'; 
-import { usePlayback } from '../context/PlaybackContext'; // 👈 اضافه شدن کانتکست پخش صوتی
+import { usePlayback } from '../context/PlaybackContext'; 
 import Sidebar from '../components/home/Sidebar';
 import Header from '../components/home/Header';
-import Showcase from '../components/home/Showcase';
 import EarlyAccess from '../components/home/EarlyAccess';
 import { getCurrentUser } from '../utils/auth';
-import { LifeBuoy, ArrowLeft } from 'lucide-react';
+import { LifeBuoy, ArrowLeft, Music, Play } from 'lucide-react';
 import {
   initMockData,
   getSongs,
@@ -27,7 +26,7 @@ import PlaylistDetail from '../components/home/PlaylistDetail';
 
 function Home() {
   const { notification, clearNotification } = useAuth();
-  const { playSong } = usePlayback(); // 👈 هوک سراسری پخش صوتی
+  const { playSong } = usePlayback(); 
   const location = useLocation(); 
   const navigate = useNavigate();
 
@@ -35,18 +34,85 @@ function Home() {
   const [selectedAlbum, setSelectedAlbum] = useState(null); 
   const [user, setUser] = useState(() => getCurrentUser());
 
+  const [topSongsState, setTopSongsState] = useState([]);
+
+  initMockData();
+
+  const [songs] = useState(() => getSongs());
+  const [albums] = useState(() => getAlbums());
+  const [playlists] = useState(() => getPlaylists());
+  const [earlyAccess] = useState(() => getEarlyAccess());
+  const [publishedWorks] = useState(() => getPublishedWorks());
+  const [allArtists] = useState(() => getArtists());
+
+  // محاسبه کاملاً پویا و زنده محبوب‌ترین آهنگ‌ها برحسب فیلد لایو plays در لود صفحه خانه
   useEffect(() => {
     const activeUser = getCurrentUser();
     if (!activeUser) {
       navigate('/login');
-    } else {
-      setUser(prevUser => {
-        if (prevUser?.email !== activeUser.email) {
-          return activeUser;
-        }
-        return prevUser;
-      });
+      return;
     }
+    setUser(activeUser);
+
+    // واکشی مجدد آخرین دیتای لایو ذخیره شده در لوکال استوریج
+    const liveSongs = JSON.parse(localStorage.getItem('songs') || '[]');
+    let livePublishedWorks = [];
+    try {
+      // 🛠️ سینک زنده بخش Most Played هوم با کلید اصلی شما (artist_works)
+      livePublishedWorks = JSON.parse(localStorage.getItem('artist_works') || '[]');
+    } catch(e) {}
+
+    const userSongsMapped = livePublishedWorks
+      .filter(w => w.type === 'single' || w.type === 'track')
+      .map(w => ({
+        id: w.id,
+        title: w.title,
+        artist: w.artistName || 'artist6',
+        artistId: w.artistId,
+        cover: w.cover || null,
+        plays: w.plays || 0,
+        uniqueUsers: w.uniqueUsers || [],
+        itemType: 'song',
+        src: w.audioUrl || w.audioData || ''
+      }));
+
+    // استخراج ترک‌های داخل آلبوم‌ها برای شرکت در رقابت محبوب‌ترین‌ها
+    let albumTracksMapped = [];
+    livePublishedWorks.forEach(album => {
+      if (album.type === 'album' && album.tracks) {
+        album.tracks.forEach(t => {
+          albumTracksMapped.push({
+            id: t.id,
+            title: t.title,
+            artist: t.artist || album.artistName || 'Uploaded Artist',
+            artistId: album.artistId,
+            cover: t.cover || album.cover,
+            plays: t.plays || 0,
+            uniqueUsers: t.uniqueUsers || [],
+            itemType: 'song',
+            src: t.audioData || t.audioUrl || t.src || ''
+          });
+        });
+      }
+    });
+
+    const combinedSongs = [
+      ...liveSongs.map(s => ({ ...s, itemType: 'song', plays: s.plays || 0, uniqueUsers: s.uniqueUsers || [] })),
+      ...userSongsMapped,
+      ...albumTracksMapped
+    ];
+
+    // فیلتر آیدی‌های تکراری و مرتب‌سازی قاطع برحسب تعداد دفعات پخش (plays) نزولی
+    const seenIds = new Set();
+    const sortedTopSongs = combinedSongs
+      .filter(s => {
+        if (seenIds.has(s.id)) return false;
+        seenIds.add(s.id);
+        return true;
+      })
+      .sort((a, b) => b.plays - a.plays);
+
+    setTopSongsState(sortedTopSongs);
   }, [location.pathname, navigate]);
 
   useEffect(() => {
@@ -56,7 +122,6 @@ function Home() {
         navigate('/albums'); 
       }
     };
-
     window.addEventListener('globalSelectAlbum', handleGlobalAlbumSelect);
     return () => window.removeEventListener('globalSelectAlbum', handleGlobalAlbumSelect);
   }, [navigate]);
@@ -75,19 +140,9 @@ function Home() {
     setSelectedPlaylist(null);
   }, [location.pathname]);
 
-  initMockData();
-
-  const [songs] = useState(() => getSongs());
-  const [albums] = useState(() => getAlbums());
-  const [playlists] = useState(() => getPlaylists());
-  const [earlyAccess] = useState(() => getEarlyAccess());
-  const [publishedWorks] = useState(() => getPublishedWorks());
-  const [allArtists] = useState(() => getArtists());
-
   const handleSelectArtist = (artistNameOrId) => {
     const storedArtists = JSON.parse(localStorage.getItem('artists') || '[]');
     const foundArtist = storedArtists.find(a => a.id === artistNameOrId || a.name === artistNameOrId);
-    
     if (foundArtist) {
       localStorage.setItem('selected_artist_view', JSON.stringify(foundArtist));
     } else {
@@ -105,9 +160,7 @@ function Home() {
     return 'Unknown Artist';
   };
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const userAlbums = publishedWorks
     .filter(w => w.type === 'album')
@@ -116,30 +169,135 @@ function Home() {
       title: w.title,
       artist: w.artistName || getArtistName(w.artistId),
       artistId: w.artistId,
-      cover: w.cover || 'https://via.placeholder.com/300/2a2a2a/fff?text=No+Cover',
+      cover: w.cover || null,
       year: w.releaseDate ? new Date(w.releaseDate).getFullYear() : new Date().getFullYear(),
+      itemType: 'album'
     }));
 
-  const userSongs = publishedWorks
-    .filter(w => w.type === 'single')
-    .map(w => ({
-      id: w.id,
-      title: w.title,
-      artist: w.artistName || getArtistName(w.artistId),
-      artistId: w.artistId,
-      cover: w.cover || 'https://via.placeholder.com/300/2a2a2a/fff?text=No+Cover',
-      plays: w.plays || 0,
-    }));
-
-  const latestAlbums = [...albums, ...userAlbums].sort((a, b) => b.year - a.year);
-  const topSongs = [...songs, ...userSongs].sort((a, b) => b.plays - a.plays);
-  const latestPlaylists = [...playlists].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
+  const latestAlbums = [...albums.map(a => ({ ...a, itemType: 'album' })), ...userAlbums].sort((a, b) => b.year - a.year);
   
+  const getDynamicPlaylists = () => {
+    const stored = JSON.parse(localStorage.getItem('playlists') || '[]');
+    const activeEmail = user.email || '';
+    const userPls = stored.filter(p => p.ownerEmail === activeEmail || p.createdBy === activeEmail || p.owner === (user.displayName || user.username));
+    return userPls.length > 0 ? userPls.map(p => ({ ...p, itemType: 'playlist' })) : playlists.map(p => ({ ...p, itemType: 'playlist' }));
+  };
+  
+  const latestPlaylists = getDynamicPlaylists();
   const isGold = user?.subscription === 'gold';
 
-  // این تابع کامپوننت را داخل فایل src/pages/Home.jsx پیدا کن و با این بازنویسی کن
+  const UnifiedShowcase = ({ title, items, type, onSelect }) => {
+    const [hoveredId, setHoveredId] = useState(null);
+
+    const handleItemClick = (item) => {
+      if (type === 'song') {
+        const rawUser = localStorage.getItem('currentUser') || '{}';
+        const activeUsername = JSON.parse(rawUser).username || 'anonymous';
+        
+        const localSongs = JSON.parse(localStorage.getItem('songs') || '[]');
+        if (localSongs.some(s => s.id === item.id)) {
+          const updated = localSongs.map(s => {
+            if (s.id === item.id) {
+              const users = s.uniqueUsers || [];
+              if (!users.includes(activeUsername)) users.push(activeUsername);
+              return { ...s, plays: (s.plays || 0) + 1, uniqueUsers: users };
+            }
+            return s;
+          });
+          localStorage.setItem('songs', JSON.stringify(updated));
+        }
+
+        // 🛠️ اصلاح کلید از publishedWorks به artist_works برای ثبت پلی لایو از روی دکمه‌های صفحه اصلی
+        const storedWorks = JSON.parse(localStorage.getItem('artist_works') || '[]');
+        const updatedWorks = storedWorks.map(w => {
+          if (w.id === item.id) {
+            const users = w.uniqueUsers || [];
+            if (!users.includes(activeUsername)) users.push(activeUsername);
+            return { ...w, plays: (w.plays || 0) + 1, uniqueUsers: users };
+          }
+          if (w.type === 'album' && w.tracks) {
+            const ut = w.tracks.map(t => {
+              if (t.id === item.id) {
+                const users = t.uniqueUsers || [];
+                if (!users.includes(activeUsername)) users.push(activeUsername);
+                return { ...t, plays: (t.plays || 0) + 1, uniqueUsers: users };
+              }
+              return t;
+            });
+            return { ...w, tracks: ut };
+          }
+          return w;
+        });
+        localStorage.setItem('artist_works', JSON.stringify(updatedWorks));
+
+        playSong(item, items.filter(s => s.id !== item.id));
+      } else if (type === 'playlist') {
+        setSelectedPlaylist(item);
+        navigate('/playlists');
+      } else {
+        if (onSelect) onSelect(item);
+      }
+    };
+
+    return (
+      <div style={{ marginBottom: '40px', textAlign: 'left' }}>
+        <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '18px', color: '#fff', letterSpacing: '-0.5px' }}>{title}</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '24px' }}>
+          {items.slice(0, 5).map((item, idx) => {
+            const currentId = item.id || idx;
+            const isHovered = hoveredId === currentId;
+            return (
+              <div
+                key={currentId}
+                onClick={() => handleItemClick(item)}
+                onMouseEnter={() => setHoveredId(currentId)}
+                onMouseLeave={() => setHoveredId(null)}
+                style={{
+                  backgroundColor: isHovered ? '#242424' : '#181818',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  position: 'relative',
+                  transition: 'background-color 0.25s ease',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                }}
+              >
+                <div style={{ position: 'relative', width: '100%', paddingTop: '100%', marginBottom: '14px', backgroundColor: '#282828', borderRadius: '6px', overflow: 'hidden' }}>
+                  {item.cover ? <img src={item.cover} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Music size={44} style={{ color: '#535353' }} /></div>}
+                  
+                  {type === 'song' && (
+                    <div style={{ position: 'absolute', bottom: isHovered ? '12px' : '-50px', right: '12px', backgroundColor: '#1db954', borderRadius: '50%', width: '42px', height: '42px', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', transform: isHovered ? 'scale(1)' : 'scale(0.6)', opacity: isHovered ? 1 : 0, zIndex: 3 }}>
+                      <Play size={18} fill="#fff" color="#fff" style={{ marginLeft: '2px' }} />
+                    </div>
+                  )}
+                </div>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#fff' }}>{item.title || item.name}</h4>
+                <p 
+                  onClick={(e) => {
+                    if (type !== 'playlist') {
+                      e.stopPropagation();
+                      handleSelectArtist(item.artistId || item.artist);
+                    }
+                  }}
+                  style={{ color: '#b3b3b3', fontSize: '13px', margin: 0, cursor: type !== 'playlist' ? 'pointer' : 'default', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  onMouseOver={(e) => { if(type !== 'playlist') e.currentTarget.style.textDecoration = 'underline'; }}
+                  onMouseOut={(e) => { if(type !== 'playlist') e.currentTarget.style.textDecoration = 'none'; }}
+                >
+                  {type === 'playlist' ? `${item.songs?.length || 0} tracks` : (item.artist || 'Spotify Work')}
+                </p>
+                {type === 'song' && (
+                  <div style={{ fontSize: '11px', color: '#6a6a6a', marginTop: '4px' }}>
+                    {item.plays || 0} plays • {(item.uniqueUsers || []).length} listeners
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const AlbumDetailView = ({ album, onBack }) => {
     const [activeTrackMenuId, setActiveTrackMenuId] = useState(null);
     const [myPlaylists, setMyPlaylists] = useState([]);
@@ -158,10 +316,7 @@ function Home() {
       setMyPlaylists(userPlaylists);
     }, [activeTrackMenuId]);
 
-    // 🛠️ لود مستقیم ترک‌های واقعی آپلود شده توسط تو
     let albumTracks = album.tracks || [];
-    
-    // اگر آلبوم از دیتای پیش‌فرض سیستم بود، از فایل ماک فیلترش کن
     if (albumTracks.length === 0) {
       albumTracks = songs.filter(s => s.albumId === album.id || s.albumTitle === album.title);
     }
@@ -191,7 +346,7 @@ function Home() {
         </button>
 
         <div style={{ display: 'flex', gap: '28px', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap' }}>
-          <img src={album.cover || 'https://via.placeholder.com/300/2a2a2a/fff?text=No+Cover'} alt="" style={{ width: '180px', height: '180px', borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)', objectFit: 'cover' }} />
+          <img src={album.cover || 'https://picsum.photos/300'} alt="" style={{ width: '180px', height: '180px', borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)', objectFit: 'cover' }} />
           <div style={{ textAlign: 'left' }}>
             <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#1db954', backgroundColor: '#181818', padding: '4px 10px', borderRadius: '12px' }}>ALBUM</span>
             <h2 style={{ fontSize: '36px', margin: '12px 0 6px 0', fontWeight: '900', letterSpacing: '-1px' }}>{album.title}</h2>
@@ -205,7 +360,6 @@ function Home() {
           <h3 style={{ borderBottom: '1px solid #282828', paddingBottom: '12px', marginBottom: '16px', fontSize: '18px', fontWeight: 'bold', textAlign: 'left' }}>Tracks List</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {albumTracks.map((track, index) => {
-              // ساخت ساختار کاملاً معتبر صوتی از ترک‌های واقعی تو
               const safeTrack = { 
                 ...track, 
                 itemType: 'song', 
@@ -224,7 +378,28 @@ function Home() {
                   
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <button 
-                      onClick={() => playSong(safeTrack, albumTracks.map(t => ({ ...t, itemType: 'song', src: t.audioData || t.audioUrl || t.src || null })).filter(t => t.id !== track.id))}
+                      onClick={() => {
+                        const rawUser = localStorage.getItem('currentUser') || '{}';
+                        const activeUsername = JSON.parse(rawUser).username || 'anonymous';
+                        // 🛠️ اصلاح کلید از publishedWorks به artist_works برای ثبت پلی لایو در نمایش تفکیکی داخل آلبوم هوم
+                        const storedWorks = JSON.parse(localStorage.getItem('artist_works') || '[]');
+                        const updatedWorks = storedWorks.map(w => {
+                          if (w.id === album.id && w.tracks) {
+                            const ut = w.tracks.map(t => {
+                              if (t.id === track.id) {
+                                const users = t.uniqueUsers || [];
+                                if (!users.includes(activeUsername)) users.push(activeUsername);
+                                return { ...t, plays: (t.plays || 0) + 1, uniqueUsers: users };
+                              }
+                              return t;
+                            });
+                            return { ...w, tracks: ut };
+                          }
+                          return w;
+                        });
+                        localStorage.setItem('artist_works', JSON.stringify(updatedWorks));
+                        playSong(safeTrack, albumTracks.map(t => ({ ...t, itemType: 'song', src: t.audioData || t.audioUrl || t.src || null })).filter(t => t.id !== track.id));
+                      }}
                       style={{ backgroundColor: '#1db954', border: 'none', color: '#fff', padding: '6px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}
                     >
                       Play
@@ -292,9 +467,9 @@ function Home() {
           {(location.pathname === '/home' || location.pathname === '/') && (
             <>
               <NotificationsPanel currentUser={user} />
-              <Showcase title="Latest Playlists" items={latestPlaylists} type="playlist" />
-              <Showcase title="Latest Albums" items={latestAlbums} type="album" onSelect={(alb) => { setSelectedAlbum(alb); navigate('/albums'); }} />
-              <Showcase title="Most Played Songs" items={topSongs} type="song" />
+              <UnifiedShowcase title="Latest Playlists" items={latestPlaylists} type="playlist" />
+              <UnifiedShowcase title="Latest Albums" items={latestAlbums} type="album" onSelect={(alb) => { setSelectedAlbum(alb); navigate('/albums'); }} />
+              <UnifiedShowcase title="Most Played Songs" items={topSongsState} type="song" />
               <EarlyAccess items={earlyAccess} isGold={isGold} />
             </>
           )}
