@@ -10,10 +10,9 @@ const MyWorksList = ({ works, onDelete, onEdit, onNavigateToUpload }) => {
   const [sortField, setSortField] = useState('title');
   const [sortOrder, setSortOrder] = useState('asc');
   
-  // استیت‌های نویگیشن داخلی
-  const [viewMode, setViewMode] = useState('singles'); // 'singles' یا 'albums'
-  const [selectedAlbum, setSelectedAlbum] = useState(null); // نگهداری آلبومی که برای دیدن ترک‌ها کلیک شده
-  const [selectedWork, setSelectedWork] = useState(null); // آهنگی که در حال پخش و نمایش جزئیات است
+  const [viewMode, setViewMode] = useState('singles'); 
+  const [selectedAlbum, setSelectedAlbum] = useState(null); 
+  const [selectedWork, setSelectedWork] = useState(null); 
 
   const filtered = works.filter((w) => w.title?.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -38,7 +37,7 @@ const MyWorksList = ({ works, onDelete, onEdit, onNavigateToUpload }) => {
         <p>Publish your first work!</p>
         <button 
           className={styles.uploadBtn}
-          onClick={onNavigateToUpload} /* 👈 اینجا تغییر کرد */
+          onClick={onNavigateToUpload}
         >
           Upload New Work
         </button>
@@ -49,6 +48,8 @@ const MyWorksList = ({ works, onDelete, onEdit, onNavigateToUpload }) => {
   // --- نمای پخش آهنگ (Detail View) ---
   if (selectedWork) {
     const hasAudio = !!(selectedWork.audioData || selectedWork.audioUrl || selectedWork.audioFileName);
+    const generatedRevenue = (selectedWork.plays || 0) * 50; // محاسبه درآمد بر اساس هر استریم ۵۰ ریال
+
     return (
       <div className={styles.detailView}>
         <button className={styles.backBtn} onClick={() => setSelectedWork(null)}>
@@ -76,7 +77,8 @@ const MyWorksList = ({ works, onDelete, onEdit, onNavigateToUpload }) => {
             <div className={styles.detailStats}>
               <span><EarIcon size={18} color="var(--primary-accent)" /> {selectedWork.listeners || 0} listeners</span>
               <span><PlaysIcon size={18} color="#2f88ff" /> {selectedWork.plays || 0} plays</span>
-              <span><MoneyBagIcon size={18} color="#f5a623" /> {(selectedWork.revenue || 0).toLocaleString()} IRR</span>
+              {/* نمایش درآمد محاسبه شده در جزئیات */}
+              <span><MoneyBagIcon size={18} color="#f5a623" /> {generatedRevenue.toLocaleString()} IRR</span>
             </div>
           </div>
         </div>
@@ -99,6 +101,9 @@ const MyWorksList = ({ works, onDelete, onEdit, onNavigateToUpload }) => {
             <div>
               <h2 style={{ margin: '0 0 0.5rem 0' }}>{selectedAlbum.title}</h2>
               <p style={{ color: '#b3b3b3', margin: 0 }}>Album • {selectedAlbum.tracks?.length || 0} Tracks</p>
+              <p style={{ color: '#f5a623', margin: '0.5rem 0 0 0', fontWeight: 'bold' }}>
+                 Total Album Value: {((selectedAlbum.plays || 0) * 50).toLocaleString()} IRR
+              </p>
             </div>
           </div>
           
@@ -107,20 +112,24 @@ const MyWorksList = ({ works, onDelete, onEdit, onNavigateToUpload }) => {
             {selectedAlbum.tracks?.map((track, idx) => (
               <div key={track.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#222', padding: '1rem', borderRadius: '8px', cursor: 'pointer' }} 
                    onClick={() => {
-                     // ساخت یک آبجکت "تک‌آهنگ مجازی" برای پخش در Detail View
                      setSelectedWork({
                        ...track,
                        cover: selectedAlbum.cover,
                        releaseDate: selectedAlbum.releaseDate,
                        genre: selectedAlbum.genre,
-                       plays: selectedAlbum.plays, // برای سادگی، آمار آلبوم رو نشون می‌دیم
-                       listeners: selectedAlbum.listeners,
-                       revenue: selectedAlbum.revenue,
+                       plays: track.plays || 0, // آمار دقیق خود ترک رو پاس می‌دیم
+                       listeners: track.listeners || 0,
                        type: 'single'
                      });
                    }}>
                 <span style={{ fontWeight: '500' }}>{idx + 1}. {track.title}</span>
-                <span style={{ color: '#1db954', fontSize: '0.9rem' }}>▶ Play</span>
+                <div>
+                  {/* نمایش درآمد مجزای هر ترک در آلبوم */}
+                  <span style={{ color: '#b3b3b3', fontSize: '0.85rem', marginRight: '1.5rem' }}>
+                    {((track.plays || 0) * 50).toLocaleString()} IRR
+                  </span>
+                  <span style={{ color: '#1db954', fontSize: '0.9rem' }}>▶ Play</span>
+                </div>
               </div>
             ))}
           </div>
@@ -176,6 +185,11 @@ const MyWorksList = ({ works, onDelete, onEdit, onNavigateToUpload }) => {
                 {work.type === 'album' ? `Album • ${work.tracks?.length || 0} Tracks` : 'Single'} • {work.genre || 'No Genre'}
               </div>
               <div className={styles.meta}>Released: {work.releaseDate || 'Unknown'}</div>
+              
+              {/* نمایش درآمد در کارت‌های اصلی داشبورد */}
+              <div className={styles.meta} style={{ color: '#f5a623', fontWeight: 'bold', marginTop: '0.5rem' }}>
+                 💰 {((work.plays || 0) * 50).toLocaleString()} IRR Generated
+              </div>
             </div>
 
             <div className={styles.actions} onClick={(e) => e.stopPropagation()}>

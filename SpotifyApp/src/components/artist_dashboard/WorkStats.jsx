@@ -3,9 +3,34 @@ import styles from '../../styles/WorkStats.module.css';
 import { EarIcon, PlaysIcon, MoneyBagIcon } from '../icons';
 
 const WorkStats = ({ works }) => {
+  // ۱. خواندن اطلاعات خود هنرمند از حافظه برای دریافت پولی که ادمین واریز کرده
+  const rawUser = localStorage.getItem('currentUser') || '{}';
+  const currentUser = JSON.parse(rawUser);
+
+  // ۲. محاسبه مجموع استریم‌ها
   const totalPlays = works.reduce((sum, w) => sum + (Number(w.plays) || 0), 0);
-  const totalListeners = works.reduce((sum, w) => sum + (Number(w.listeners) || 0), 0);
-  const totalRevenue = works.reduce((sum, w) => sum + (Number(w.revenue) || 0), 0);
+
+  // ۳. محاسبه شنوندگان منحصر‌به‌فرد (جلوگیری از شمارش تکراری یک شخص)
+  const uniqueListenersSet = new Set();
+  works.forEach(w => {
+    if (w.uniqueUsers) {
+      w.uniqueUsers.forEach(userId => uniqueListenersSet.add(userId));
+    }
+    // اگر آلبوم است، شنوندگان ترک‌ها را هم اضافه کن
+    if (w.tracks) {
+      w.tracks.forEach(t => {
+        if (t.uniqueUsers) t.uniqueUsers.forEach(userId => uniqueListenersSet.add(userId));
+      });
+    }
+  });
+  
+  // اگر دیتای uniqueUsers هنوز شکل نگرفته بود، از همون listeners پیش‌فرض استفاده کن
+  const totalListeners = uniqueListenersSet.size > 0 
+    ? uniqueListenersSet.size 
+    : works.reduce((sum, w) => sum + (Number(w.listeners) || 0), 0);
+
+  // ۴. خواندن مستقیم درآمد از کیف پول هنرمند
+  const totalRevenue = currentUser.totalRevenue || 0;
 
   return (
     <div className={styles.container}>

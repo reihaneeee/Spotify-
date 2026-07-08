@@ -66,14 +66,38 @@ const FinancialAudit = ({ userRole }) => {
 
   const handleSettle = (artistId, unpaidStreams) => {
     if (window.confirm('Confirm payment for recent unpaid streams?')) {
+      const amountToPay = unpaidStreams * 50; // محاسبه مبلغ پرداختی فعلی
+
+      // ۱. آپدیت رکورد تسویه‌های ادمین
       const settlements = JSON.parse(localStorage.getItem('financial_settlements') || '{}');
-      if (!settlements[artistId]) settlements[artistId] = { paidStreams: 0 };
+      if (!settlements[artistId]) settlements[artistId] = { paidStreams: 0, totalPaid: 0 };
       
-      // اضافه کردن استریم‌های جدید به لیست استریم‌های پرداخت شده
       settlements[artistId].paidStreams += unpaidStreams;
+      settlements[artistId].totalPaid = (settlements[artistId].totalPaid || 0) + amountToPay;
       localStorage.setItem('financial_settlements', JSON.stringify(settlements));
       
-      loadFinancialData(); // رفرش درجا
+      // ۲. וریز پول به حساب خود هنرمند (آپدیت دیتابیس کاربران)
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const updatedUsers = users.map(u => {
+        if (u.id === artistId || u.username === artistId) {
+          return {
+            ...u,
+            totalRevenue: (u.totalRevenue || 0) + amountToPay // اضافه کردن پول جدید به موجودی قبلی
+          };
+        }
+        return u;
+      });
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
+      
+      // اگر هنرمند در همون لحظه لاگین هست، اطلاعات سشن فعلیش هم آپدیت بشه (اختیاری ولی کاربردی برای تست)
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (currentUser.id === artistId || currentUser.username === artistId) {
+        currentUser.totalRevenue = (currentUser.totalRevenue || 0) + amountToPay;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      }
+      
+      loadFinancialData(); // رفرش درجا جدول
+      alert(`Payment of ${amountToPay.toLocaleString()} IRR processed successfully!`);
     }
   };
 
