@@ -1,0 +1,35 @@
+# =======================
+# Python (Django) Backend
+# =======================
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/db.sqlite3
+backend/media/
+backend/staticfiles/
+backend/.env
+backend/.env.local
+
+# =======================
+# React (Vite) Frontend
+# =======================
+SpotifyApp/node_modules/
+SpotifyApp/dist/
+SpotifyApp/build/
+SpotifyApp/.env
+SpotifyApp/.env.local
+SpotifyApp/*.log
+SpotifyApp/package-lock.json   # اگر می‌خواهید package-lock.json را آپلود نکنید، این خط را نگه دارید. (معمولاً آپلود می‌شود)
+
+# =======================
+# Docker & General
+# =======================
+.dockerignore
+docker-compose.override.yml
+*.log
+*.pid
+*.seed
+*.pid.lock
+.DS_Store
+.idea/
+.vscode/

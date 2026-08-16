@@ -1,0 +1,131 @@
+/* src/styles/AdminDashboard.module.css */
+
+.dashboard {
+  flex: 1;
+  background: #121212;
+  min-height: 100vh;
+  color: #fff;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #2a2a2a;
+  padding-bottom: 1rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.headerIcon {
+  color: #1db954;
+}
+
+.userInfo {
+  color: #b3b3b3;
+  font-weight: 600;
+  background: #1a1a1a;
+  padding: 0.5rem 1rem;
+  border-radius: 500px;
+  border: 1px solid #2a2a2a;
+}
+
+.dashboardLayout {
+  display: flex;
+  gap: 2rem;
+}
+
+/* سایدبار داخلی ادمین */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: #181818;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebarItem {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: #b3b3b3;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.sidebarItem:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.sidebarItem.active {
+  background: #1db954;
+  color: #000;
+  font-weight: 700;
+}
+
+.content {
+  flex: 1;
+  background: #181818;
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid #2a2a2a;
+  min-height: 600px;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .dashboardLayout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .sidebarItem {
+    width: auto;
+    flex: 1;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+}

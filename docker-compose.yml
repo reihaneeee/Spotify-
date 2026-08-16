@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: spotify_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_DEBUG=0
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - ZARINPAL_MERCHANT_ID=${ZARINPAL_MERCHANT_ID}
+    volumes:
+      - ./backend:/app
+      - ./backend/media:/app/media
+    restart: always
+
+  frontend:
+    build:
+      context: ./SpotifyApp
+      dockerfile: Dockerfile
+    container_name: spotify_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: always

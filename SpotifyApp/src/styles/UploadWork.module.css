@@ -1,0 +1,267 @@
+.uploadForm {
+  background: var(--bg-card);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+}
+
+.uploadForm h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.errorMessage {
+  background: rgba(226, 33, 52, 0.1);
+  color: var(--danger-color);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(226, 33, 52, 0.2);
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-right: 1rem;
+}
+
+.formGroup label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.uploadForm input[type="text"],
+.uploadForm input[type="date"],
+.uploadForm input[type="url"],
+.uploadForm select,
+.uploadForm textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: border-color var(--transition-speed);
+}
+
+.uploadForm input:focus,
+.uploadForm select:focus,
+.uploadForm textarea:focus {
+  outline: none;
+  border-color: var(--primary-accent);
+}
+
+.uploadForm textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Drag & Drop Zones */
+.dropZone {
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  background: rgba(255, 255, 255, 0.02);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropZone.dragOver {
+  border-color: var(--primary-accent);
+  background: rgba(29, 185, 84, 0.05);
+}
+
+.dropContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropIcon {
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.dropZone p {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.dropHint {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.dropFormat {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+/* Preview Containers */
+.previewContainer {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeImage {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition-speed);
+}
+
+.removeImage:hover {
+  background: var(--danger-color);
+}
+
+.audioPreviewContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-hover);
+  padding: 1rem;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.audioFileName {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.audioPreviewInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Utilities */
+.orDivider {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* Progress Bar */
+.progressWrapper {
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-dark);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--primary-accent);
+  transition: width 0.2s ease;
+}
+
+.progressText {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  min-width: 40px;
+}
+
+/* Action Buttons */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.submitBtn, .cancelBtn {
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--transition-speed);
+  border: none;
+}
+
+.submitBtn {
+  background: var(--primary-accent);
+  color: #fff;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #1ed760;
+  transform: translateY(-2px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.cancelBtn:hover {
+  background: var(--bg-hover);
+}
+
+.dateInput {
+  color-scheme: dark;
+}
